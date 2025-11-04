@@ -2,9 +2,34 @@
 class DatabaseAPI {
     constructor() {
         this.baseURL = window.location.origin;
+        // Fallback to localStorage if server is not running
+        this.useLocalStorage = false;
+    }
+    
+    async checkServerConnection() {
+        try {
+            const response = await fetch(`${this.baseURL}/api/stats`);
+            return response.ok;
+        } catch (error) {
+            this.useLocalStorage = true;
+            return false;
+        }
     }
 
     async addQuestion(questionData) {
+        if (this.useLocalStorage || !(await this.checkServerConnection())) {
+            // Fallback to localStorage
+            const questions = JSON.parse(localStorage.getItem('curafam_questions') || '[]');
+            const newQuestion = {
+                _id: Date.now().toString(),
+                ...questionData,
+                createdAt: new Date().toISOString()
+            };
+            questions.unshift(newQuestion);
+            localStorage.setItem('curafam_questions', JSON.stringify(questions));
+            return newQuestion;
+        }
+        
         try {
             const response = await fetch(`${this.baseURL}/api/questions`, {
                 method: 'POST',
@@ -19,16 +44,32 @@ class DatabaseAPI {
     }
 
     async getQuestions() {
+        if (this.useLocalStorage || !(await this.checkServerConnection())) {
+            return JSON.parse(localStorage.getItem('curafam_questions') || '[]');
+        }
+        
         try {
             const response = await fetch(`${this.baseURL}/api/questions`);
             return await response.json();
         } catch (error) {
             console.error('Error fetching questions:', error);
-            return [];
+            return JSON.parse(localStorage.getItem('curafam_questions') || '[]');
         }
     }
 
     async addDoctor(doctorData) {
+        if (this.useLocalStorage || !(await this.checkServerConnection())) {
+            const doctors = JSON.parse(localStorage.getItem('curafam_doctors') || '[]');
+            const newDoctor = {
+                _id: Date.now().toString(),
+                ...doctorData,
+                createdAt: new Date().toISOString()
+            };
+            doctors.push(newDoctor);
+            localStorage.setItem('curafam_doctors', JSON.stringify(doctors));
+            return newDoctor;
+        }
+        
         try {
             const response = await fetch(`${this.baseURL}/api/doctors`, {
                 method: 'POST',
@@ -53,6 +94,19 @@ class DatabaseAPI {
     }
 
     async getStats() {
+        if (this.useLocalStorage || !(await this.checkServerConnection())) {
+            const questions = JSON.parse(localStorage.getItem('curafam_questions') || '[]');
+            const doctors = JSON.parse(localStorage.getItem('curafam_doctors') || '[]');
+            const answeredQuestions = questions.filter(q => q.answer);
+            const successRate = questions.length > 0 ? Math.round((answeredQuestions.length / questions.length) * 100) : 0;
+            return {
+                totalQuestions: questions.length,
+                answeredQuestions: answeredQuestions.length,
+                totalDoctors: doctors.length,
+                successRate
+            };
+        }
+        
         try {
             const response = await fetch(`${this.baseURL}/api/stats`);
             return await response.json();
