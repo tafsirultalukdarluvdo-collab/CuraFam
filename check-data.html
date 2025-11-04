@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Check - CuraFam Admin</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-logo">
+                    <a href="index.html" style="color: white; text-decoration: none;">
+                        <img src="logo.png" alt="CuraFam" style="height: 40px; margin-right: 10px; vertical-align: middle;">
+                        <h2 style="display: inline; vertical-align: middle;">CuraFam Admin</h2>
+                    </a>
+                </div>
+                <ul class="nav-menu">
+                    <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="admin-panel">
+                <h1>Admin Dashboard</h1>
+                
+                <div class="admin-stats" id="adminStats"></div>
+                <div class="storage-info" id="storageInfo"></div>
+
+                <div id="doctorDetails" style="margin-top: 3rem;">
+                    <h2>Registered Doctors List</h2>
+                    <div id="doctorsList"></div>
+                </div>
+
+                <div style="margin-top: 2rem; text-align: center;">
+                    <button class="btn btn-secondary" onclick="exportAllData()">Export Data</button>
+                    <button class="btn btn-primary" onclick="window.location.href='index.html'">Back to Home</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="local-database.js"></script>
+    <script>
+        let database;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            database = new LocalDatabase();
+            loadAdminData();
+        });
+
+        function loadAdminData() {
+            const stats = database.getStatistics();
+            
+            document.getElementById('adminStats').innerHTML = `
+                <div class="admin-stat-card">
+                    <h3>${stats.doctors.total}</h3>
+                    <p>Total Doctors</p>
+                </div>
+                <div class="admin-stat-card">
+                    <h3>${stats.doctors.human}</h3>
+                    <p>Human Doctors</p>
+                </div>
+                <div class="admin-stat-card">
+                    <h3>${stats.doctors.animal}</h3>
+                    <p>Veterinarians</p>
+                </div>
+                <div class="admin-stat-card">
+                    <h3>${stats.questions.total}</h3>
+                    <p>Total Questions</p>
+                </div>
+                <div class="admin-stat-card">
+                    <h3>${stats.questions.answered}</h3>
+                    <p>Answered</p>
+                </div>
+                <div class="admin-stat-card">
+                    <h3>${stats.questions.pending}</h3>
+                    <p>Pending</p>
+                </div>
+            `;
+
+            const storage = stats.storage;
+            const barClass = storage.percentage > 80 ? 'danger' : storage.percentage > 60 ? 'warning' : '';
+            
+            document.getElementById('storageInfo').innerHTML = `
+                <h3>Storage Information</h3>
+                <p>Used: ${storage.usedMB} MB / ${storage.maxMB} MB</p>
+                <div class="storage-bar">
+                    <div class="storage-fill ${barClass}" style="width: ${storage.percentage}%"></div>
+                </div>
+                <p>${storage.percentage}% used</p>
+                <p>Approximately ${Math.floor((5 - parseFloat(storage.usedMB)) / 0.0005)} more doctors can be added</p>
+            `;
+            
+            loadDoctorsList();
+        }
+        
+        function loadDoctorsList() {
+            const doctors = database.getAllDoctors();
+            const doctorsList = document.getElementById('doctorsList');
+            
+            if (doctors.length === 0) {
+                doctorsList.innerHTML = '<p>No doctors registered yet.</p>';
+                return;
+            }
+            
+            doctorsList.innerHTML = doctors.map(doctor => `
+                <div class="service-card" style="margin-bottom: 1rem; text-align: left;">
+                    <h4>${doctor.name}</h4>
+                    <p><strong>Type:</strong> ${doctor.type === 'human' ? 'Human Doctor' : 'Veterinarian'}</p>
+                    <p><strong>Specialization:</strong> ${doctor.specialization}</p>
+                    <p><strong>Email:</strong> ${doctor.email}</p>
+                    <p><strong>Phone:</strong> ${doctor.phone}</p>
+                    <p><strong>Qualification:</strong> ${doctor.qualification || 'Not provided'}</p>
+                    <p><strong>Experience:</strong> ${doctor.experience || 0} years</p>
+                    <p><strong>Registration Date:</strong> ${new Date(doctor.registeredAt).toLocaleDateString('en-US')}</p>
+                    ${doctor.registrationType === 'quick' ? '<span style="background: #ffc107; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">Quick Registration</span>' : ''}
+                    <div style="margin-top: 1rem;">
+                        <button class="btn" style="background: #dc3545; color: white; padding: 5px 15px; font-size: 0.9rem;" onclick="deleteDoctor('${doctor.id}', '${doctor.name}')">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function deleteDoctor(doctorId, doctorName) {
+            if (confirm(`Are you sure you want to delete "${doctorName}"'s registration?`)) {
+                const result = database.deleteDoctor(doctorId);
+                
+                if (result.success) {
+                    alert('Doctor registration deleted successfully.');
+                    loadAdminData();
+                } else {
+                    alert('Error deleting registration: ' + result.error);
+                }
+            }
+        }
+
+        function exportAllData() {
+            const result = database.exportData();
+            if (result.success) {
+                const dataStr = JSON.stringify(result.data, null, 2);
+                const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(dataBlob);
+                link.download = `curafam-backup-${new Date().toISOString().split('T')[0]}.json`;
+                link.click();
+                
+                alert('Data exported successfully!');
+            } else {
+                alert('Error exporting data.');
+            }
+        }
+    </script>
+</body>
+</html>

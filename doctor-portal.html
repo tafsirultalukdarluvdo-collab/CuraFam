@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ডাক্তার পোর্টাল - CuraFam</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background: #f8fafc; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
+        header { background: linear-gradient(135deg, #2E8B57, #20B2AA); color: white; padding: 1rem 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        header .container { display: flex; justify-content: space-between; align-items: center; }
+        .logo h1 { font-size: 2rem; }
+        .btn { display: inline-block; padding: 0.8rem 1.5rem; background: #2E8B57; color: white; text-decoration: none; border-radius: 8px; transition: all 0.3s; border: none; cursor: pointer; }
+        .btn:hover { background: #236B43; transform: translateY(-2px); }
+        .btn-secondary { background: #20B2AA; }
+        .portal-section { padding: 2rem 0; }
+        .portal-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin: 2rem 0; }
+        .portal-card { background: white; padding: 2rem; border-radius: 15px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .portal-card i { font-size: 3rem; color: #20B2AA; margin-bottom: 1rem; }
+        .portal-card h3 { color: #2E8B57; margin-bottom: 1rem; }
+        .benefits { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); margin: 2rem 0; }
+        .benefits ul { list-style: none; padding: 0; }
+        .benefits li { padding: 0.5rem 0; display: flex; align-items: center; gap: 0.5rem; }
+        .benefits li i { color: #10b981; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1><i class="fas fa-heartbeat"></i> CuraFam</h1>
+                <p>ডাক্তার পোর্টাল</p>
+            </div>
+            <nav>
+                <a href="index.html" class="btn btn-secondary">হোম</a>
+                <a href="doctor-dashboard.html" class="btn">ড্যাশবোর্ড</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="portal-section">
+        <div class="container">
+            <div style="text-align: center; margin-bottom: 3rem;">
+                <h2>CuraFam এ যোগ দিন</h2>
+                <p>বিনামূল্যে চিকিৎসা সেবা প্রদান করুন এবং সমাজের কল্যাণে অংশগ্রহণ করুন</p>
+            </div>
+
+            <div class="portal-cards">
+                <div class="portal-card">
+                    <i class="fas fa-rocket"></i>
+                    <h3>দ্রুত রেজিস্ট্রেশন</h3>
+                    <p>মাত্র ২ মিনিটে রেজিস্ট্রেশন সম্পন্ন করুন এবং সেবা শুরু করুন</p>
+                    <a href="doctor-register-quick.html" class="btn">দ্রুত রেজিস্ট্রেশন</a>
+                </div>
+                
+                <div class="portal-card">
+                    <i class="fas fa-user-md"></i>
+                    <h3>ডাক্তার ড্যাশবোর্ড</h3>
+                    <p>প্রশ্নের উত্তর দিন এবং রোগীদের সাহায্য করুন</p>
+                    <a href="doctor-dashboard.html" class="btn">ড্যাশবোর্ড দেখুন</a>
+                </div>
+            </div>
+
+            <div class="benefits">
+                <h3>CuraFam এ যোগ দেওয়ার সুবিধা</h3>
+                <ul>
+                    <li><i class="fas fa-check"></i> হাজারো রোগীকে সাহায্য করার সুযোগ</li>
+                    <li><i class="fas fa-check"></i> পেশাগত সুনাম বৃদ্ধি</li>
+                    <li><i class="fas fa-check"></i> সম্পূর্ণ বিনামূল্যে প্ল্যাটফর্ম</li>
+                    <li><i class="fas fa-check"></i> নমনীয় সময়সূচী</li>
+                    <li><i class="fas fa-check"></i> সামাজিক সেবার সুযোগ</li>
+                </ul>
+            </div>
+
+            <div style="text-align: center; background: linear-gradient(135deg, #2E8B57, #20B2AA); color: white; padding: 3rem; border-radius: 15px;">
+                <h3>অন্য ডাক্তারদের আমন্ত্রণ জানান</h3>
+                <p>আপনার সহকর্মী ডাক্তারদের CuraFam এ যোগ দিতে উৎসাহিত করুন</p>
+                <div style="margin-top: 1rem;">
+                    <button class="btn" onclick="sharePortal()" style="background: white; color: #2E8B57;">পোর্টাল শেয়ার করুন</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function sharePortal() {
+            const shareText = `🩺 CuraFam ডাক্তার পোর্টালে যোগ দিন!
+
+📋 দ্রুত রেজিস্ট্রেশন: ${window.location.origin}/doctor-register-quick.html
+
+✅ বিনামূল্যে রোগীদের সেবা দিন
+✅ পেশাগত সুনাম বৃদ্ধি করুন  
+✅ সামাজিক দায়বদ্ধতা পালন করুন
+
+#CuraFam #ডাক্তার #চিকিৎসাসেবা`;
+
+            if (navigator.share) {
+                navigator.share({
+                    title: 'CuraFam ডাক্তার পোর্টাল',
+                    text: shareText,
+                    url: window.location.href
+                });
+            } else if (navigator.clipboard) {
+                navigator.clipboard.writeText(shareText).then(() => {
+                    alert('✅ ডাক্তার পোর্টালের লিংক কপি হয়েছে!\n\nএখন আপনি এটি শেয়ার করতে পারেন।');
+                });
+            } else {
+                alert('📋 এই লিংকটি শেয়ার করুন:\n\n' + shareText);
+            }
+        }
+    </script>
+</body>
+</html>

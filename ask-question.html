@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ask Question - CuraFam</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-logo">
+                    <a href="index.html" style="color: white; text-decoration: none;">
+                        <h2>CuraFam</h2>
+                    </a>
+                </div>
+                
+                <ul class="nav-menu">
+                    <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
+                    <li class="nav-item"><a href="browse-qa.html" class="nav-link">Q&A</a></li>
+                    <li class="nav-item"><a href="doctor-portal.html" class="nav-link">Doctor Portal</a></li>
+                    <li class="nav-item"><a href="emergency.html" class="nav-link">Emergency</a></li>
+                </ul>
+
+                <div class="hamburger" onclick="toggleMobileMenu()">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="form-container">
+                <h1>Ask a Question</h1>
+                <p>Get free medical advice for your health concerns</p>
+
+                <div class="toggle-container">
+                    <span>Human Healthcare</span>
+                    <div class="toggle-switch" id="typeToggle" onclick="toggleQuestionType()">
+                        <div class="toggle-slider"></div>
+                    </div>
+                    <span>Veterinary Care</span>
+                </div>
+
+                <form id="questionForm">
+                    <div class="form-group">
+                        <label for="patientName">Patient Name *</label>
+                        <input type="text" id="patientName" name="patientName" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="patientAge">Age</label>
+                        <input type="text" id="patientAge" name="patientAge" placeholder="e.g., 25 years or 3 months">
+                    </div>
+
+                    <div class="form-group" id="genderGroup">
+                        <label for="patientGender">Gender</label>
+                        <select id="patientGender" name="patientGender">
+                            <option value="">Select</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="speciesGroup" style="display: none;">
+                        <label for="animalSpecies">Animal Species</label>
+                        <select id="animalSpecies" name="animalSpecies">
+                            <option value="">Select</option>
+                            <option value="dog">Dog</option>
+                            <option value="cat">Cat</option>
+                            <option value="cow">Cow</option>
+                            <option value="goat">Goat</option>
+                            <option value="chicken">Chicken</option>
+                            <option value="bird">Bird</option>
+                            <option value="fish">Fish</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="questionTitle">Question Title *</label>
+                        <input type="text" id="questionTitle" name="questionTitle" 
+                               placeholder="Briefly describe your problem" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="questionContent">Detailed Description *</label>
+                        <textarea id="questionContent" name="questionContent" 
+                                  placeholder="Provide detailed description of your problem. Include symptoms, duration, any treatments taken, etc." 
+                                  required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contactInfo">Contact Information (Optional)</label>
+                        <input type="text" id="contactInfo" name="contactInfo" 
+                               placeholder="Phone number or email (for emergency contact)">
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="privacyConsent" required>
+                            I agree that my question and answer may be published to help others (personal information will be kept confidential)
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Submit Question</button>
+                </form>
+
+                <div class="form-info">
+                    <h3>Important Information:</h3>
+                    <ul>
+                        <li>✅ Completely free service</li>
+                        <li>✅ Get answers within 24 hours</li>
+                        <li>✅ Advice from qualified and experienced doctors</li>
+                        <li>⚠️ Go directly to hospital in emergency situations</li>
+                        <li>⚠️ This advice is not a substitute for direct medical treatment</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>CuraFam</h3>
+                    <p>Your Family Healthcare</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="browse-qa.html">Browse Answers</a></li>
+                        <li><a href="doctor-portal.html">Doctor Portal</a></li>
+                        <li><a href="emergency.html">Emergency</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 CuraFam. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="local-database.js"></script>
+    <script>
+        let database;
+        let currentType = 'human';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            database = new LocalDatabase();
+        });
+
+        function toggleMobileMenu() {
+            const navMenu = document.querySelector('.nav-menu');
+            const hamburger = document.querySelector('.hamburger');
+            
+            navMenu.classList.toggle('active');
+            hamburger.classList.toggle('active');
+        }
+
+        function toggleQuestionType() {
+            const toggle = document.getElementById('typeToggle');
+            const genderGroup = document.getElementById('genderGroup');
+            const speciesGroup = document.getElementById('speciesGroup');
+            
+            toggle.classList.toggle('active');
+            
+            if (toggle.classList.contains('active')) {
+                currentType = 'animal';
+                genderGroup.style.display = 'none';
+                speciesGroup.style.display = 'block';
+            } else {
+                currentType = 'human';
+                genderGroup.style.display = 'block';
+                speciesGroup.style.display = 'none';
+            }
+        }
+
+        document.getElementById('questionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const questionData = {
+                type: currentType,
+                patientName: formData.get('patientName'),
+                patientAge: formData.get('patientAge'),
+                patientGender: currentType === 'human' ? formData.get('patientGender') : null,
+                animalSpecies: currentType === 'animal' ? formData.get('animalSpecies') : null,
+                title: formData.get('questionTitle'),
+                content: formData.get('questionContent'),
+                contactInfo: formData.get('contactInfo')
+            };
+
+            const validation = database.validateQuestion(questionData);
+            if (!validation.isValid) {
+                alert('Error:\n' + validation.errors.join('\n'));
+                return;
+            }
+
+            const result = database.addQuestion(questionData);
+            
+            if (result.success) {
+                alert('Your question has been submitted successfully! You will receive answers from doctors soon.');
+                this.reset();
+                
+                currentType = 'human';
+                document.getElementById('typeToggle').classList.remove('active');
+                document.getElementById('genderGroup').style.display = 'block';
+                document.getElementById('speciesGroup').style.display = 'none';
+                
+                setTimeout(() => {
+                    window.location.href = 'browse-qa.html';
+                }, 2000);
+            } else {
+                alert('There was a problem submitting your question. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>

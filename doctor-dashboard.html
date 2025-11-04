@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ডাক্তার ড্যাশবোর্ড - CuraFam</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background: #f8fafc; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
+        header { background: linear-gradient(135deg, #2E8B57, #20B2AA); color: white; padding: 1rem 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        header .container { display: flex; justify-content: space-between; align-items: center; }
+        .logo h1 { font-size: 2rem; }
+        .btn { display: inline-block; padding: 0.8rem 1.5rem; background: #2E8B57; color: white; text-decoration: none; border-radius: 8px; transition: all 0.3s; border: none; cursor: pointer; }
+        .btn:hover { background: #236B43; transform: translateY(-2px); }
+        .btn-secondary { background: #20B2AA; }
+        .btn-danger { background: #dc2626; }
+        .dashboard { padding: 2rem 0; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .stat-card { background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; }
+        .stat-number { font-size: 2rem; font-weight: bold; color: #2E8B57; }
+        .qa-card { background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 1rem; }
+        .question-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+        .question-type { padding: 0.3rem 0.8rem; border-radius: 15px; font-size: 0.8rem; font-weight: 600; }
+        .question-type.human { background: #dbeafe; color: #1e40af; }
+        .question-type.animal { background: #fef3c7; color: #d97706; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group textarea { width: 100%; padding: 0.8rem; border: 2px solid #e5e7eb; border-radius: 8px; min-height: 100px; }
+        .no-questions { text-align: center; padding: 3rem; color: #666; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1><i class="fas fa-heartbeat"></i> CuraFam</h1>
+                <p>ডাক্তার ড্যাশবোর্ড</p>
+            </div>
+            <nav>
+                <a href="index.html" class="btn btn-secondary">হোম</a>
+                <a href="doctor-portal.html" class="btn">রেজিস্ট্রেশন</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="dashboard">
+        <div class="container">
+            <div style="background: white; padding: 1rem; border-radius: 10px; margin-bottom: 2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <h3>ডাক্তার লগইন</h3>
+                <div style="display: flex; gap: 1rem; align-items: center; margin-top: 1rem;">
+                    <input type="text" id="doctorIdInput" placeholder="আপনার ইউজার ID" style="flex: 1; padding: 0.8rem; border: 2px solid #e5e7eb; border-radius: 8px;">
+                    <button class="btn" onclick="loginDoctor()">লগইন</button>
+                    <button class="btn btn-danger" onclick="logoutDoctor()">লগআউট</button>
+                </div>
+                <div id="loginStatus" style="margin-top: 1rem; font-weight: bold;"></div>
+            </div>
+            
+            <div id="dashboardContent" style="display: none;">
+                <h2 id="welcomeMessage">স্বাগতম, ডাক্তার!</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalQuestions">0</div>
+                    <p>মোট প্রশ্ন</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="answeredQuestions">0</div>
+                    <p>উত্তর দেওয়া প্রশ্ন</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="pendingQuestions">0</div>
+                    <p>অপেক্ষমাণ প্রশ্ন</p>
+                </div>
+                <div class="stat-card" onclick="showNotifications()" style="cursor: pointer; border: 2px solid #20B2AA;">
+                    <div class="stat-number" id="newNotifications" style="color: #dc2626;">0</div>
+                    <p>🔔 নতুন নোটিফিকেশন</p>
+                </div>
+            </div>
+
+            <div id="notificationPanel" style="display: none; background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3>🔔 নতুন প্রশ্নের নোটিফিকেশন</h3>
+                    <button class="btn btn-secondary" onclick="hideNotifications()">বন্ধ করুন</button>
+                </div>
+                <div id="notificationsList"></div>
+            </div>
+
+            <h3>অপেক্ষমাণ প্রশ্নসমূহ</h3>
+            <div id="questionsContainer">
+                <div class="no-questions">
+                    <i class="fas fa-comments" style="font-size: 3rem; color: #20B2AA; margin-bottom: 1rem;"></i>
+                    <h3>কোন প্রশ্ন নেই</h3>
+                    <p>এখনো কোন রোগী প্রশ্ন করেনি।</p>
+                </div>
+            </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        class LocalDatabase {
+            getQuestions() {
+                return JSON.parse(localStorage.getItem('curafam_questions') || '[]');
+            }
+            getDoctors() {
+                return JSON.parse(localStorage.getItem('curafam_doctors') || '[]');
+            }
+            getNotifications() {
+                return JSON.parse(localStorage.getItem('curafam_notifications') || '[]');
+            }
+            markNotificationRead(notificationId) {
+                const notifications = this.getNotifications();
+                const notification = notifications.find(n => n.id === notificationId);
+                if (notification) {
+                    notification.read = true;
+                    localStorage.setItem('curafam_notifications', JSON.stringify(notifications));
+                }
+            }
+            updateQuestion(questionId, answer, doctorId) {
+                const doctors = this.getDoctors();
+                const doctor = doctors.find(d => d.id === doctorId);
+                if (!doctor) {
+                    return { success: false, error: 'অবৈধ ডাক্তার ID' };
+                }
+                
+                const questions = this.getQuestions();
+                const questionIndex = questions.findIndex(q => q.id === questionId);
+                if (questionIndex !== -1) {
+                    questions[questionIndex].answer = answer;
+                    questions[questionIndex].answeredAt = new Date().toISOString();
+                    questions[questionIndex].answeredBy = doctor.name;
+                    questions[questionIndex].doctorId = doctorId;
+                    localStorage.setItem('curafam_questions', JSON.stringify(questions));
+                    return { success: true };
+                }
+                return { success: false, error: 'প্রশ্ন পাওয়া যায়নি' };
+            }
+        }
+
+        const localDB = new LocalDatabase();
+
+        function loadDashboard() {
+            const questions = localDB.getQuestions();
+            const answered = questions.filter(q => q.answer);
+            const pending = questions.filter(q => !q.answer);
+            const notifications = localDB.getNotifications();
+            const unreadNotifications = notifications.filter(n => !n.read);
+
+            document.getElementById('totalQuestions').textContent = questions.length;
+            document.getElementById('answeredQuestions').textContent = answered.length;
+            document.getElementById('pendingQuestions').textContent = pending.length;
+            document.getElementById('newNotifications').textContent = unreadNotifications.length;
+
+            const container = document.getElementById('questionsContainer');
+            if (pending.length === 0) {
+                container.innerHTML = `
+                    <div class="no-questions">
+                        <i class="fas fa-comments" style="font-size: 3rem; color: #20B2AA; margin-bottom: 1rem;"></i>
+                        <h3>কোন প্রশ্ন নেই</h3>
+                        <p>এখনো কোন রোগী প্রশ্ন করেনি।</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = pending.map(q => `
+                <div class="qa-card">
+                    <div class="question-header">
+                        <h3>${q.title}</h3>
+                        <span class="question-type ${q.type}">${q.type === 'human' ? 'মানুষ' : 'পশু'}</span>
+                    </div>
+                    <p><strong>প্রশ্ন:</strong> ${q.description}</p>
+                    <p><strong>বয়স:</strong> ${q.age || 'উল্লেখ নেই'}</p>
+                    <p><strong>তারিখ:</strong> ${new Date(q.createdAt).toLocaleDateString('bn-BD')}</p>
+                    
+                    <div class="form-group">
+                        <label>আপনার উত্তর:</label>
+                        <textarea id="answer_${q.id}" placeholder="এখানে আপনার উত্তর লিখুন..."></textarea>
+                    </div>
+                    <button class="btn" onclick="submitAnswer('${q.id}')">উত্তর জমা দিন</button>
+                </div>
+            `).join('');
+        }
+
+        function loginDoctor() {
+            const doctorId = document.getElementById('doctorIdInput').value.trim();
+            if (!doctorId) {
+                alert('ইউজার ID দিন');
+                return;
+            }
+            
+            const doctors = localDB.getDoctors();
+            const doctor = doctors.find(d => d.id === doctorId);
+            if (doctor) {
+                localStorage.setItem('curafam_logged_doctor', doctorId);
+                document.getElementById('loginStatus').innerHTML = `<span style="color: green;">✓ লগইন সফল: ${doctor.name}</span>`;
+                document.getElementById('welcomeMessage').textContent = `স্বাগতম, ডা. ${doctor.name}!`;
+                document.getElementById('dashboardContent').style.display = 'block';
+                loadDashboard();
+            } else {
+                alert('অবৈধ ইউজার ID');
+            }
+        }
+        
+        function logoutDoctor() {
+            localStorage.removeItem('curafam_logged_doctor');
+            document.getElementById('loginStatus').innerHTML = '<span style="color: red;">✗ লগআউট হয়েছে</span>';
+            document.getElementById('dashboardContent').style.display = 'none';
+            document.getElementById('doctorIdInput').value = '';
+        }
+
+        function submitAnswer(questionId) {
+            const loggedDoctorId = localStorage.getItem('curafam_logged_doctor');
+            if (!loggedDoctorId) {
+                alert('প্রথমে লগইন করুন');
+                return;
+            }
+            
+            const answerText = document.getElementById(`answer_${questionId}`).value.trim();
+            if (!answerText) {
+                alert('অনুগ্রহ করে উত্তর লিখুন।');
+                return;
+            }
+
+            const result = localDB.updateQuestion(questionId, answerText, loggedDoctorId);
+            if (result.success) {
+                alert('উত্তর সফলভাবে জমা দেওয়া হয়েছে!');
+                loadDashboard();
+            } else {
+                alert('ত্রুটি: ' + result.error);
+            }
+        }
+
+        function showNotifications() {
+            const notifications = localDB.getNotifications();
+            const panel = document.getElementById('notificationPanel');
+            const list = document.getElementById('notificationsList');
+            
+            if (notifications.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: #666;">কোন নোটিফিকেশন নেই</p>';
+            } else {
+                list.innerHTML = notifications.map(n => `
+                    <div style="padding: 1rem; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 0.5rem; ${n.read ? 'opacity: 0.6;' : 'background: #f0f9ff;'}">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="color: #2E8B57; margin: 0;">${n.title}</h4>
+                                <p style="margin: 0.5rem 0; color: #666;">নতুন প্রশ্ন (${n.type === 'human' ? 'মানুষ' : 'পশু'})</p>
+                                <small style="color: #888;">${new Date(n.createdAt).toLocaleString('bn-BD')}</small>
+                            </div>
+                            <button class="btn" onclick="markAsRead('${n.id}')" ${n.read ? 'disabled' : ''}>
+                                ${n.read ? 'পড়া হয়েছে' : 'পড়া হয়েছে মার্ক করুন'}
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            panel.style.display = 'block';
+        }
+        
+        function hideNotifications() {
+            document.getElementById('notificationPanel').style.display = 'none';
+        }
+        
+        function markAsRead(notificationId) {
+            localDB.markNotificationRead(notificationId);
+            loadDashboard();
+            showNotifications();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const loggedDoctorId = localStorage.getItem('curafam_logged_doctor');
+            if (loggedDoctorId) {
+                const doctors = localDB.getDoctors();
+                const doctor = doctors.find(d => d.id === loggedDoctorId);
+                if (doctor) {
+                    document.getElementById('doctorIdInput').value = loggedDoctorId;
+                    document.getElementById('loginStatus').innerHTML = `<span style="color: green;">✓ লগইন সফল: ${doctor.name}</span>`;
+                    document.getElementById('welcomeMessage').textContent = `স্বাগতম, ডা. ${doctor.name}!`;
+                    document.getElementById('dashboardContent').style.display = 'block';
+                    loadDashboard();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

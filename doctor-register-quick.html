@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>দ্রুত রেজিস্ট্রেশন - CuraFam</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background: #f8fafc; }
+        .container { max-width: 800px; margin: 0 auto; padding: 0 1rem; }
+        header { background: linear-gradient(135deg, #2E8B57, #20B2AA); color: white; padding: 1rem 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        header .container { display: flex; justify-content: space-between; align-items: center; }
+        .logo { display: flex; align-items: center; }
+        .logo h1 { font-size: 2rem; margin: 0; }
+        .logo p { margin: 0; font-size: 0.9rem; opacity: 0.9; }
+        .btn { display: inline-block; padding: 0.8rem 1.5rem; background: #2E8B57; color: white; text-decoration: none; border-radius: 8px; transition: all 0.3s; border: none; cursor: pointer; font-size: 1rem; }
+        .btn:hover { background: #236B43; transform: translateY(-2px); }
+        .btn-secondary { background: #20B2AA; }
+        .form-section { padding: 2rem 0; }
+        .form-card { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.8rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #20B2AA; }
+        .toggle-container { display: flex; align-items: center; justify-content: center; gap: 1rem; margin: 1.5rem 0; }
+        .toggle-switch { position: relative; width: 60px; height: 30px; background: #ccc; border-radius: 15px; cursor: pointer; transition: all 0.3s; }
+        .toggle-switch.active { background: #20B2AA; }
+        .toggle-slider { position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; background: white; border-radius: 50%; transition: all 0.3s; }
+        .toggle-switch.active .toggle-slider { transform: translateX(30px); }
+        .benefits { background: #f0f9ff; padding: 1.5rem; border-radius: 10px; margin: 1.5rem 0; }
+        .benefits ul { list-style: none; padding: 0; }
+        .benefits li { padding: 0.3rem 0; display: flex; align-items: center; gap: 0.5rem; }
+        .benefits li i { color: #10b981; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <img src="logo.png.png" alt="CuraFam" style="height: 50px;">
+                <div style="margin-left: 10px;">
+                    <h1 style="margin: 0; font-size: 1.8rem;">CuraFam</h1>
+                    <p style="margin: 0; font-size: 0.9rem; opacity: 0.9;">দ্রুত রেজিস্ট্রেশন</p>
+                </div>
+            </div>
+            <nav>
+                <a href="index.html" class="btn btn-secondary">হোম</a>
+                <a href="doctor-portal.html" class="btn">পোর্টাল</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="form-section">
+        <div class="container">
+            <div class="form-card">
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <h2><i class="fas fa-rocket"></i> দ্রুত ডাক্তার রেজিস্ট্রেশন</h2>
+                    <p>মাত্র ২ মিনিটে রেজিস্ট্রেশন সম্পন্ন করুন এবং রোগীদের সেবা শুরু করুন</p>
+                </div>
+
+                <div class="form-group">
+                    <label>ডাক্তারের ধরন *</label>
+                    <div style="display: flex; gap: 1.5rem; margin-top: 0.5rem; flex-wrap: wrap;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input type="radio" name="doctorType" value="human" checked onchange="changeDoctorType()">
+                            <i class="fas fa-user"></i> মানুষের ডাক্তার
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input type="radio" name="doctorType" value="animal" onchange="changeDoctorType()">
+                            <i class="fas fa-paw"></i> পশু চিকিৎসক
+                        </label>
+                    </div>
+                </div>
+
+                <form id="quickRegistrationForm">
+                    <div class="form-group">
+                        <label for="doctorName">আপনার নাম *</label>
+                        <input type="text" id="doctorName" required placeholder="ডা. আপনার পূর্ণ নাম">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="doctorEmail">ইমেইল ঠিকানা *</label>
+                        <input type="email" id="doctorEmail" required placeholder="your.email@example.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="doctorPhone">ফোন নম্বর *</label>
+                        <input type="tel" id="doctorPhone" required placeholder="০১XXXXXXXXX">
+                    </div>
+
+                    <div class="form-group">
+                        <label>আপনি কি? *</label>
+                        <div style="display: flex; gap: 1.5rem; margin-top: 0.5rem;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="radio" name="userType" value="doctor" checked onchange="changeUserType()">
+                                <i class="fas fa-user-md"></i> চিকিৎসক
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="radio" name="userType" value="student" onchange="changeUserType()">
+                                <i class="fas fa-graduation-cap"></i> চিকিৎসা ছাত্র
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="doctorSpecialty">বিশেষত্ব *</label>
+                        <select id="doctorSpecialty" required>
+                            <option value="">নির্বাচন করুন</option>
+                            <optgroup label="মানুষের চিকিৎসা" id="humanSpecialties">
+                                <option value="সাধারণ চিকিৎসা">সাধারণ চিকিৎসা</option>
+                                <option value="কার্ডিওলজি">কার্ডিওলজি</option>
+                                <option value="নিউরোলজি">নিউরোলজি</option>
+                                <option value="গ্যাস্ট্রোএন্টেরোলজি">গ্যাস্ট্রোএন্টেরোলজি</option>
+                                <option value="অর্থোপেডিক্স">অর্থোপেডিক্স</option>
+                                <option value="গাইনোকোলজি">গাইনোকোলজি</option>
+                                <option value="শিশু বিশেষজ্ঞ">শিশু বিশেষজ্ঞ</option>
+                                <option value="চর্মরোগ">চর্মরোগ</option>
+                                <option value="চক্ষু বিশেষজ্ঞ">চক্ষু বিশেষজ্ঞ</option>
+                                <option value="নাক কান গলা">নাক কান গলা</option>
+                                <option value="মানসিক রোগ">মানসিক রোগ</option>
+                                <option value="সার্জারি">সার্জারি</option>
+                                <option value="অন্যান্য">অন্যান্য</option>
+                            </optgroup>
+                            <optgroup label="পশু চিকিৎসা" id="animalSpecialties" style="display: none;">
+                                <option value="সাধারণ পশু চিকিৎসা">সাধারণ পশু চিকিৎসা</option>
+                                <option value="গবাদি পশু">গবাদি পশু</option>
+                                <option value="পোষা প্রাণী">পোষা প্রাণী</option>
+                                <option value="হাঁস-মুরগি">হাঁস-মুরগি</option>
+                                <option value="মাছ চাষ">মাছ চাষ</option>
+                                <option value="পশু সার্জারি">পশু সার্জারি</option>
+                                <option value="প্রজনন বিশেষজ্ঞ">প্রজনন বিশেষজ্ঞ</option>
+                                <option value="অন্যান্য">অন্যান্য</option>
+                            </optgroup>
+                            <optgroup label="চিকিৎসা ছাত্র" id="studentSpecialties" style="display: none;">
+                                <option value="MBBS ছাত্র">MBBS ছাত্র</option>
+                                <option value="BDS ছাত্র">BDS ছাত্র</option>
+                                <option value="DVM ছাত্র">DVM ছাত্র</option>
+                                <option value="নার্সিং ছাত্র">নার্সিং ছাত্র</option>
+                                <option value="ফার্মেসি ছাত্র">ফার্মেসি ছাত্র</option>
+                                <option value="মেডিক্যাল টেকনোলজি">মেডিক্যাল টেকনোলজি</option>
+                                <option value="অন্যান্য">অন্যান্য</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="licenseGroup">
+                        <label for="doctorLicense">লাইসেন্স নম্বর *</label>
+                        <input type="text" id="doctorLicense" required placeholder="BMDC/DVM লাইসেন্স নম্বর">
+                    </div>
+                    
+                    <div class="form-group" id="studentIdGroup" style="display: none;">
+                        <label for="studentId">ছাত্র আইডি/রোল নম্বর *</label>
+                        <input type="text" id="studentId" placeholder="আপনার ছাত্র আইডি বা রোল নম্বর">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="doctorInstitution" id="institutionLabel">বর্তমান কর্মস্থল</label>
+                        <input type="text" id="doctorInstitution" placeholder="হাসপাতাল/ক্লিনিকের নাম (ঐচ্ছিক)">
+                    </div>
+
+                    <div class="form-group" id="educationGroup">
+                        <label for="doctorEducation" id="educationLabel">কোন কলেজ থেকে পড়াশোনা করেছেন? *</label>
+                        <input type="text" id="doctorEducation" required placeholder="মেডিক্যাল কলেজের নাম">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="doctorExperience">অভিজ্ঞতা *</label>
+                        <select id="doctorExperience" required>
+                            <option value="">নির্বাচন করুন</option>
+                            <option value="১ বছরের কম">১ বছরের কম</option>
+                            <option value="১-৩ বছর">১-৩ বছর</option>
+                            <option value="৩-৫ বছর">৩-৫ বছর</option>
+                            <option value="৫-১০ বছর">৫-১০ বছর</option>
+                            <option value="১০-১৫ বছর">১০-১৫ বছর</option>
+                            <option value="১৫+ বছর">১৫+ বছর</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="doctorQualification">প্রাথমিক ডিগ্রি *</label>
+                        <select id="doctorQualification" required>
+                            <option value="">নির্বাচন করুন</option>
+                            <optgroup label="মানুষের চিকিৎসা" id="humanQualifications">
+                                <option value="MBBS">MBBS</option>
+                                <option value="MBBS, MD">MBBS, MD</option>
+                                <option value="MBBS, MS">MBBS, MS</option>
+                                <option value="MBBS, FCPS">MBBS, FCPS</option>
+                                <option value="MBBS, MRCP">MBBS, MRCP</option>
+                                <option value="BDS">BDS (দন্ত চিকিৎসক)</option>
+                                <option value="অন্যান্য">অন্যান্য</option>
+                            </optgroup>
+                            <optgroup label="পশু চিকিৎসা" id="animalQualifications" style="display: none;">
+                                <option value="DVM">DVM</option>
+                                <option value="DVM, MS">DVM, MS</option>
+                                <option value="VSc">VSc</option>
+                                <option value="VSc, MVSc">VSc, MVSc</option>
+                                <option value="অন্যান্য">অন্যান্য</option>
+                            </optgroup>
+                            <optgroup label="চিকিৎসা ছাত্র" id="studentQualifications" style="display: none;">
+                                <option value="MBBS (চলমান)">MBBS (চলমান)</option>
+                                <option value="BDS (চলমান)">BDS (চলমান)</option>
+                                <option value="DVM (চলমান)">DVM (চলমান)</option>
+                                <option value="BSc Nursing">BSc Nursing</option>
+                                <option value="Diploma in Pharmacy">Diploma in Pharmacy</option>
+                                <option value="অন্যান্য">অন্যান্য</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="doctorAddress">ঠিকানা *</label>
+                        <textarea id="doctorAddress" required placeholder="সম্পূর্ণ ঠিকানা (জেলা, বিভাগ সহ)"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="termsConsent" required>
+                            আমি নিশ্চিত করছি যে আমি একজন লাইসেন্সপ্রাপ্ত ডাক্তার
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="ethicsConsent" required>
+                            আমি চিকিৎসা নৈতিকতা মেনে চলবো এবং সঠিক পরামর্শ দেবো
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="freeServiceConsent" required>
+                            আমি CuraFam এ বিনামূল্যে সেবা প্রদানে সম্মত
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn" style="width: 100%;">দ্রুত রেজিস্ট্রেশন সম্পন্ন করুন</button>
+                </form>
+
+                <div class="benefits">
+                    <h3>দ্রুত রেজিস্ট্রেশনের সুবিধা:</h3>
+                    <ul>
+                        <li><i class="fas fa-check"></i> মাত্র ২ মিনিটে রেজিস্ট্রেশন</li>
+                        <li><i class="fas fa-check"></i> তৎক্ষণাত সেবা শুরু</li>
+                        <li><i class="fas fa-check"></i> পরে বিস্তারিত তথ্য আপডেট করার সুযোগ</li>
+                        <li><i class="fas fa-check"></i> রোগীদের প্রশ্নের উত্তর দেওয়া শুরু করুন</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        class LocalDatabase {
+            addDoctor(doctorData) {
+                const doctors = JSON.parse(localStorage.getItem('curafam_doctors') || '[]');
+                const newDoctor = {
+                    id: Date.now().toString(),
+                    ...doctorData,
+                    createdAt: new Date().toISOString(),
+                    registrationType: 'quick'
+                };
+                doctors.push(newDoctor);
+                localStorage.setItem('curafam_doctors', JSON.stringify(doctors));
+                return newDoctor.id;
+            }
+        }
+
+        const localDB = new LocalDatabase();
+        let currentType = 'human';
+
+        function changeUserType() {
+            const userType = document.querySelector('input[name="userType"]:checked').value;
+            const humanSpecs = document.getElementById('humanSpecialties');
+            const animalSpecs = document.getElementById('animalSpecialties');
+            const studentSpecs = document.getElementById('studentSpecialties');
+            const humanQuals = document.getElementById('humanQualifications');
+            const animalQuals = document.getElementById('animalQualifications');
+            const studentQuals = document.getElementById('studentQualifications');
+            const licenseGroup = document.getElementById('licenseGroup');
+            const studentIdGroup = document.getElementById('studentIdGroup');
+            const institutionLabel = document.getElementById('institutionLabel');
+            const institutionInput = document.getElementById('doctorInstitution');
+            const educationGroup = document.getElementById('educationGroup');
+            const educationLabel = document.getElementById('educationLabel');
+            const educationInput = document.getElementById('doctorEducation');
+            
+            if (userType === 'student') {
+                currentType = 'student';
+                humanSpecs.style.display = 'none';
+                animalSpecs.style.display = 'none';
+                studentSpecs.style.display = 'block';
+                humanQuals.style.display = 'none';
+                animalQuals.style.display = 'none';
+                studentQuals.style.display = 'block';
+                licenseGroup.style.display = 'none';
+                studentIdGroup.style.display = 'block';
+                educationGroup.style.display = 'block';
+                document.getElementById('doctorLicense').required = false;
+                document.getElementById('studentId').required = true;
+                institutionLabel.textContent = 'বিশ্ববিদ্যালয়ের নাম *';
+                institutionInput.placeholder = 'আপনার বিশ্ববিদ্যালয়ের নাম';
+                institutionInput.required = true;
+                educationLabel.textContent = 'কোন কলেজ থেকে পড়াশোনা করছেন? *';
+                educationInput.placeholder = 'মেডিক্যাল কলেজের নাম';
+            } else {
+                institutionLabel.textContent = 'বর্তমান কর্মস্থল';
+                institutionInput.placeholder = 'হাসপাতাল/ক্লিনিকের নাম (ঐচ্ছিক)';
+                institutionInput.required = false;
+                educationGroup.style.display = 'block';
+                educationLabel.textContent = 'কোন কলেজ থেকে পড়াশোনা করেছেন? *';
+                educationInput.placeholder = 'মেডিক্যাল কলেজের নাম';
+                changeDoctorType();
+            }
+            
+            document.getElementById('doctorSpecialty').value = '';
+            document.getElementById('doctorQualification').value = '';
+        }
+
+        function changeDoctorType() {
+            const selectedType = document.querySelector('input[name="doctorType"]:checked').value;
+            const humanSpecs = document.getElementById('humanSpecialties');
+            const animalSpecs = document.getElementById('animalSpecialties');
+            const humanQuals = document.getElementById('humanQualifications');
+            const animalQuals = document.getElementById('animalQualifications');
+            const licenseGroup = document.getElementById('licenseGroup');
+            const studentIdGroup = document.getElementById('studentIdGroup');
+            
+            currentType = selectedType;
+            
+            if (selectedType === 'animal') {
+                humanSpecs.style.display = 'none';
+                animalSpecs.style.display = 'block';
+                humanQuals.style.display = 'none';
+                animalQuals.style.display = 'block';
+            } else {
+                humanSpecs.style.display = 'block';
+                animalSpecs.style.display = 'none';
+                humanQuals.style.display = 'block';
+                animalQuals.style.display = 'none';
+            }
+            
+            licenseGroup.style.display = 'block';
+            studentIdGroup.style.display = 'none';
+            document.getElementById('doctorLicense').required = true;
+            document.getElementById('studentId').required = false;
+            
+            document.getElementById('doctorSpecialty').value = '';
+            document.getElementById('doctorQualification').value = '';
+        }
+
+        document.getElementById('quickRegistrationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const doctorData = {
+                type: currentType,
+                name: document.getElementById('doctorName').value.trim(),
+                email: document.getElementById('doctorEmail').value.trim().toLowerCase(),
+                phone: document.getElementById('doctorPhone').value.trim(),
+                specialty: document.getElementById('doctorSpecialty').value,
+                experience: document.getElementById('doctorExperience').value,
+                qualification: document.getElementById('doctorQualification').value,
+                license: currentType === 'student' ? 'ছাত্র' : document.getElementById('doctorLicense').value.trim(),
+                studentId: currentType === 'student' ? document.getElementById('studentId').value.trim() : null,
+                institution: document.getElementById('doctorInstitution').value.trim() || 'উল্লেখ নেই',
+                education: document.getElementById('doctorEducation').value.trim(),
+                address: document.getElementById('doctorAddress').value.trim()
+            };
+
+            // Enhanced validation
+            if (!doctorData.name || doctorData.name.length < 3) {
+                alert('নাম কমপক্ষে ৩ অক্ষরের হতে হবে');
+                return;
+            }
+
+            if (!doctorData.email || !isValidEmail(doctorData.email)) {
+                alert('সঠিক ইমেইল ঠিকানা প্রয়োজন');
+                return;
+            }
+
+            if (!doctorData.phone || !isValidBDPhone(doctorData.phone)) {
+                alert('সঠিক বাংলাদেশী ফোন নম্বর প্রয়োজন (০১XXXXXXXXX)');
+                return;
+            }
+
+            if (currentType !== 'student' && (!doctorData.license || doctorData.license.length < 4)) {
+                alert('লাইসেন্স নম্বর প্রয়োজন');
+                return;
+            }
+            
+            if (currentType === 'student' && (!doctorData.studentId || doctorData.studentId.length < 3)) {
+                alert('ছাত্র আইডি/রোল নম্বর প্রয়োজন');
+                return;
+            }
+
+            if (currentType === 'student' && (!doctorData.institution || doctorData.institution === 'উল্লেখ নেই' || doctorData.institution.length < 3)) {
+                alert('বিশ্ববিদ্যালয়ের নাম প্রয়োজন');
+                return;
+            }
+
+            if (!doctorData.address || doctorData.address.length < 10) {
+                alert('সম্পূর্ণ ঠিকানা প্রয়োজন');
+                return;
+            }
+
+            // Check if email already exists
+            const existingDoctors = JSON.parse(localStorage.getItem('curafam_doctors') || '[]');
+            if (existingDoctors.some(d => d.email === doctorData.email)) {
+                alert('এই ইমেইল দিয়ে ইতিমধ্যে রেজিস্ট্রেশন করা হয়েছে');
+                return;
+            }
+
+            const doctorId = localDB.addDoctor(doctorData);
+            
+            localStorage.setItem('curafam_logged_doctor', doctorId);
+            
+            alert(`🎉 অভিনন্দন! আপনার দ্রুত রেজিস্ট্রেশন সফল হয়েছে!\n\nআপনার ইউজার ID: ${doctorId}\n\nএই ID দিয়ে লগইন করুন।`);
+            
+            setTimeout(() => {
+                window.location.href = 'doctor-dashboard.html';
+            }, 3000);
+        });
+
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+        
+        function isValidBDPhone(phone) {
+            const bdPhoneRegex = /^(\+88)?01[3-9]\d{8}$/;
+            return bdPhoneRegex.test(phone.replace(/[\s-]/g, ''));
+        }
+    </script>
+</body>
+</html>

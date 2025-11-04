@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questions & Answers - CuraFam</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-logo">
+                    <a href="index.html" style="color: white; text-decoration: none;">
+                        <h2>CuraFam</h2>
+                    </a>
+                </div>
+                
+                <ul class="nav-menu">
+                    <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
+                    <li class="nav-item"><a href="ask-question.html" class="nav-link">Ask Question</a></li>
+                    <li class="nav-item"><a href="doctor-portal.html" class="nav-link">Doctor Portal</a></li>
+                    <li class="nav-item"><a href="emergency.html" class="nav-link">Emergency</a></li>
+                </ul>
+
+                <div class="hamburger" onclick="toggleMobileMenu()">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container" style="margin-top: 100px;">
+            <h1>Questions & Answers</h1>
+            <p>Browse medical advice from our expert doctors</p>
+
+            <div class="qa-filters">
+                <input type="text" class="search-box" id="searchBox" 
+                       placeholder="Search questions..." onkeyup="filterQuestions()">
+                
+                <button class="filter-btn active" onclick="filterByType('all')">All</button>
+                <button class="filter-btn" onclick="filterByType('human')">Human Healthcare</button>
+                <button class="filter-btn" onclick="filterByType('animal')">Veterinary Care</button>
+                <button class="filter-btn" onclick="filterByStatus('answered')">Answered</button>
+                <button class="filter-btn" onclick="filterByStatus('pending')">Pending</button>
+            </div>
+
+            <div id="questionsContainer"></div>
+
+            <div id="noQuestionsMessage" style="display: none; text-align: center; padding: 3rem;">
+                <h3>No Questions Found</h3>
+                <p>No questions match your search criteria.</p>
+                <a href="ask-question.html" class="btn btn-primary">Ask New Question</a>
+            </div>
+
+            <div id="loadingMessage" style="text-align: center; padding: 2rem;">
+                <div class="loading"></div>
+                <p>Loading questions...</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>CuraFam</h3>
+                    <p>Your Family Healthcare</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="ask-question.html">Ask Question</a></li>
+                        <li><a href="doctor-portal.html">Doctor Portal</a></li>
+                        <li><a href="emergency.html">Emergency</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 CuraFam. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="local-database.js"></script>
+    <script>
+        let database;
+        let allQuestions = [];
+        let currentFilter = { type: 'all', status: 'all' };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            database = new LocalDatabase();
+            loadQuestions();
+        });
+
+        function toggleMobileMenu() {
+            const navMenu = document.querySelector('.nav-menu');
+            const hamburger = document.querySelector('.hamburger');
+            
+            navMenu.classList.toggle('active');
+            hamburger.classList.toggle('active');
+        }
+
+        function loadQuestions() {
+            document.getElementById('loadingMessage').style.display = 'block';
+            
+            setTimeout(() => {
+                allQuestions = database.getAllQuestions();
+                displayQuestions(allQuestions);
+                document.getElementById('loadingMessage').style.display = 'none';
+            }, 500);
+        }
+
+        function displayQuestions(questions) {
+            const container = document.getElementById('questionsContainer');
+            const noQuestionsMsg = document.getElementById('noQuestionsMessage');
+            
+            if (questions.length === 0) {
+                container.innerHTML = '';
+                noQuestionsMsg.style.display = 'block';
+                return;
+            }
+            
+            noQuestionsMsg.style.display = 'none';
+            
+            const sortedQuestions = questions.sort((a, b) => new Date(b.askedAt) - new Date(a.askedAt));
+            
+            container.innerHTML = sortedQuestions.map(question => createQuestionCard(question)).join('');
+        }
+
+        function createQuestionCard(question) {
+            const typeText = question.type === 'human' ? 'Human Healthcare' : 'Veterinary Care';
+            const typeClass = question.type === 'human' ? 'human' : 'animal';
+            
+            const patientInfo = question.type === 'human' 
+                ? `${question.patientName}${question.patientAge ? `, ${question.patientAge}` : ''}${question.patientGender ? `, ${getGenderText(question.patientGender)}` : ''}`
+                : `${question.patientName}${question.animalSpecies ? ` (${getSpeciesText(question.animalSpecies)})` : ''}${question.patientAge ? `, ${question.patientAge}` : ''}`;
+            
+            return `
+                <div class="question-card">
+                    <div class="question-header">
+                        <span class="question-type ${typeClass}">${typeText}</span>
+                        <span class="question-date">${formatDate(question.askedAt)}</span>
+                    </div>
+                    
+                    <h3 class="question-title">${escapeHtml(question.title)}</h3>
+                    <p><strong>Patient:</strong> ${escapeHtml(patientInfo)}</p>
+                    <div class="question-content">${escapeHtml(question.content)}</div>
+                    
+                    ${question.answer ? `
+                        <div class="answer-section">
+                            <div class="answer-header">
+                                <span class="doctor-name">Dr. ${escapeHtml(question.answeredBy)}</span>
+                                <span class="answer-date">${formatDate(question.answeredAt)}</span>
+                            </div>
+                            <div class="answer-content">${escapeHtml(question.answer)}</div>
+                        </div>
+                    ` : `
+                        <div class="no-answer">
+                            This question has not been answered yet. You will receive answers from doctors soon.
+                        </div>
+                    `}
+                </div>
+            `;
+        }
+
+        function filterByType(type) {
+            currentFilter.type = type;
+            updateActiveButton(event.target);
+            applyFilters();
+        }
+
+        function filterByStatus(status) {
+            currentFilter.status = status;
+            updateActiveButton(event.target);
+            applyFilters();
+        }
+
+        function updateActiveButton(clickedButton) {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            clickedButton.classList.add('active');
+        }
+
+        function applyFilters() {
+            let filteredQuestions = allQuestions;
+            
+            if (currentFilter.type !== 'all') {
+                filteredQuestions = filteredQuestions.filter(q => q.type === currentFilter.type);
+            }
+            
+            if (currentFilter.status === 'answered') {
+                filteredQuestions = filteredQuestions.filter(q => q.answer);
+            } else if (currentFilter.status === 'pending') {
+                filteredQuestions = filteredQuestions.filter(q => !q.answer);
+            }
+            
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+            if (searchTerm) {
+                filteredQuestions = filteredQuestions.filter(q => 
+                    q.title.toLowerCase().includes(searchTerm) ||
+                    q.content.toLowerCase().includes(searchTerm) ||
+                    q.patientName.toLowerCase().includes(searchTerm) ||
+                    (q.answer && q.answer.toLowerCase().includes(searchTerm))
+                );
+            }
+            
+            displayQuestions(filteredQuestions);
+        }
+
+        function filterQuestions() {
+            applyFilters();
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 1) {
+                return 'Today';
+            } else if (diffDays === 2) {
+                return 'Yesterday';
+            } else if (diffDays <= 7) {
+                return `${diffDays - 1} days ago`;
+            } else {
+                return date.toLocaleDateString('en-US');
+            }
+        }
+
+        function getGenderText(gender) {
+            const genderMap = {
+                'male': 'Male',
+                'female': 'Female',
+                'other': 'Other'
+            };
+            return genderMap[gender] || gender;
+        }
+
+        function getSpeciesText(species) {
+            const speciesMap = {
+                'dog': 'Dog',
+                'cat': 'Cat',
+                'cow': 'Cow',
+                'goat': 'Goat',
+                'chicken': 'Chicken',
+                'bird': 'Bird',
+                'fish': 'Fish',
+                'other': 'Other'
+            };
+            return speciesMap[species] || species;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        setInterval(() => {
+            const newQuestions = database.getAllQuestions();
+            if (newQuestions.length !== allQuestions.length) {
+                allQuestions = newQuestions;
+                applyFilters();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
