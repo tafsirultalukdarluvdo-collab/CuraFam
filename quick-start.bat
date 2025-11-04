@@ -1,0 +1,3 @@
+@echo off
+echo Starting CuraFam with MongoDB...
+node server.js

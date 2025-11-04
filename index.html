@@ -346,58 +346,28 @@
         </div>
     </footer>
 
+    <script src="database.js"></script>
     <script>
-        // Local Database
-        class LocalDatabase {
-            constructor() {
-                this.initializeData();
-            }
-            initializeData() {
-                if (!localStorage.getItem('curafam_questions')) {
-                    localStorage.setItem('curafam_questions', JSON.stringify([]));
-                }
-                if (!localStorage.getItem('curafam_doctors')) {
-                    localStorage.setItem('curafam_doctors', JSON.stringify([]));
-                }
-                if (!localStorage.getItem('curafam_notifications')) {
-                    localStorage.setItem('curafam_notifications', JSON.stringify([]));
-                }
-            }
-            addQuestion(questionData) {
-                const questions = JSON.parse(localStorage.getItem('curafam_questions') || '[]');
-                const newQuestion = {
-                    id: Date.now().toString(),
-                    ...questionData,
-                    createdAt: new Date().toISOString(),
-                    answers: []
-                };
-                questions.unshift(newQuestion);
-                localStorage.setItem('curafam_questions', JSON.stringify(questions));
-                
-                // Add notification for doctors
-                this.addDoctorNotification(newQuestion);
-                
-                return newQuestion.id;
-            }
-            
-            addDoctorNotification(question) {
-                const notifications = JSON.parse(localStorage.getItem('curafam_notifications') || '[]');
-                const newNotification = {
-                    id: Date.now().toString(),
-                    questionId: question.id,
-                    title: question.title,
-                    type: question.type,
-                    createdAt: new Date().toISOString(),
-                    read: false
-                };
-                notifications.unshift(newNotification);
-                localStorage.setItem('curafam_notifications', JSON.stringify(notifications));
-                
-                // Send browser push notification
-                this.sendPushNotification(question);
-            }
-            
-            sendPushNotification(question) {
+        // Initialize Database API
+        const dbAPI = new DatabaseAPI();
+        
+        // Notification functions
+        function addDoctorNotification(question) {
+            const notifications = JSON.parse(localStorage.getItem('curafam_notifications') || '[]');
+            const newNotification = {
+                id: Date.now().toString(),
+                questionId: question._id,
+                title: question.title,
+                type: question.type,
+                createdAt: new Date().toISOString(),
+                read: false
+            };
+            notifications.unshift(newNotification);
+            localStorage.setItem('curafam_notifications', JSON.stringify(notifications));
+            sendPushNotification(question);
+        }
+        
+        function sendPushNotification(question) {
                 if ('Notification' in window) {
                     if (Notification.permission === 'granted') {
                         const notification = new Notification('CuraFam - নতুন প্রশ্ন', {
@@ -416,61 +386,39 @@
                     } else if (Notification.permission === 'default') {
                         Notification.requestPermission().then(permission => {
                             if (permission === 'granted') {
-                                this.sendPushNotification(question);
+                                sendPushNotification(question);
                             }
                         });
                     }
                 } else {
-                    // Fallback for browsers that don't support notifications
                     alert('🔔 নতুন প্রশ্ন: ' + question.title);
                 }
             }
-            
-            getNotifications() {
-                return JSON.parse(localStorage.getItem('curafam_notifications') || '[]');
-            }
-            
-            markNotificationRead(notificationId) {
-                const notifications = this.getNotifications();
-                const notification = notifications.find(n => n.id === notificationId);
-                if (notification) {
-                    notification.read = true;
-                    localStorage.setItem('curafam_notifications', JSON.stringify(notifications));
-                }
-            }
-            getQuestions() {
-                return JSON.parse(localStorage.getItem('curafam_questions') || '[]');
-            }
-            getDoctors() {
-                return JSON.parse(localStorage.getItem('curafam_doctors') || '[]');
-            }
-            addDoctor(doctorData) {
-                const doctors = JSON.parse(localStorage.getItem('curafam_doctors') || '[]');
-                const newDoctor = {
-                    id: Date.now().toString(),
-                    ...doctorData,
-                    createdAt: new Date().toISOString()
-                };
-                doctors.push(newDoctor);
-                localStorage.setItem('curafam_doctors', JSON.stringify(doctors));
-                return newDoctor.id;
+        
+        function getNotifications() {
+            return JSON.parse(localStorage.getItem('curafam_notifications') || '[]');
+        }
+        
+        function markNotificationRead(notificationId) {
+            const notifications = getNotifications();
+            const notification = notifications.find(n => n.id === notificationId);
+            if (notification) {
+                notification.read = true;
+                localStorage.setItem('curafam_notifications', JSON.stringify(notifications));
             }
         }
-
-        // Initialize
-        const localDB = new LocalDatabase();
         
         // Load public statistics
-        function loadPublicStats() {
-            const questions = localDB.getQuestions();
-            const doctors = localDB.getDoctors();
-            const answeredQuestions = questions.filter(q => q.answer);
-            const successRate = questions.length > 0 ? Math.round((answeredQuestions.length / questions.length) * 100) : 0;
-            
-            document.getElementById('publicTotalQuestions').textContent = questions.length;
-            document.getElementById('publicAnsweredQuestions').textContent = answeredQuestions.length;
-            document.getElementById('publicTotalDoctors').textContent = doctors.length;
-            document.getElementById('publicSuccessRate').textContent = successRate + '%';
+        async function loadPublicStats() {
+            try {
+                const stats = await dbAPI.getStats();
+                document.getElementById('publicTotalQuestions').textContent = stats.totalQuestions;
+                document.getElementById('publicAnsweredQuestions').textContent = stats.answeredQuestions;
+                document.getElementById('publicTotalDoctors').textContent = stats.totalDoctors;
+                document.getElementById('publicSuccessRate').textContent = stats.successRate + '%';
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
         }
 
         // Modal functions
@@ -483,7 +431,7 @@
 
         // Form submissions
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('questionForm').addEventListener('submit', function(e) {
+            document.getElementById('questionForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 const questionData = {
                     type: document.getElementById('questionType').value,
@@ -492,22 +440,27 @@
                     description: document.getElementById('questionDesc').value,
                     age: document.getElementById('patientAge').value
                 };
-                const questionId = localDB.addQuestion(questionData);
                 
-                // Test notification immediately
-                if ('Notification' in window && Notification.permission === 'granted') {
-                    alert('আপনার প্রশ্ন জমা হয়েছে! ডাক্তারদের নোটিফিকেশন পাঠানো হয়েছে!');
-                } else {
-                    alert('আপনার প্রশ্ন জমা হয়েছে! নোটিফিকেশন চালু করতে ব্রাউজার সেটিংস চেক করুন।');
+                try {
+                    const question = await dbAPI.addQuestion(questionData);
+                    addDoctorNotification(question);
+                    
+                    if ('Notification' in window && Notification.permission === 'granted') {
+                        alert('আপনার প্রশ্ন জমা হয়েছে! ডাক্তারদের নোটিফিকেশন পাঠানো হয়েছে!');
+                    } else {
+                        alert('আপনার প্রশ্ন জমা হয়েছে!');
+                    }
+                    
+                    this.reset();
+                    closeModal('askQuestionModal');
+                    loadQuestions();
+                    loadPublicStats();
+                } catch (error) {
+                    alert('প্রশ্ন জমা দিতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
                 }
-                
-                this.reset();
-                closeModal('askQuestionModal');
-                loadQuestions();
-                loadPublicStats();
             });
 
-            document.getElementById('doctorForm').addEventListener('submit', function(e) {
+            document.getElementById('doctorForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 const doctorData = {
                     name: document.getElementById('doctorName').value,
@@ -515,11 +468,16 @@
                     phone: document.getElementById('doctorPhone').value,
                     specialty: document.getElementById('doctorSpecialty').value
                 };
-                localDB.addDoctor(doctorData);
-                alert('ডাক্তার রেজিস্ট্রেশন সফল হয়েছে!');
-                this.reset();
-                closeModal('doctorPortalModal');
-                loadPublicStats();
+                
+                try {
+                    await dbAPI.addDoctor(doctorData);
+                    alert('ডাক্তার রেজিস্ট্রেশন সফল হয়েছে!');
+                    this.reset();
+                    closeModal('doctorPortalModal');
+                    loadPublicStats();
+                } catch (error) {
+                    alert('রেজিস্ট্রেশনে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+                }
             });
 
             document.getElementById('adminForm').addEventListener('submit', function(e) {
@@ -536,24 +494,29 @@
             });
         });
 
-        function loadQuestions() {
-            const questions = localDB.getQuestions();
-            const container = document.getElementById('qaContainer');
-            if (questions.length === 0) {
-                container.innerHTML = '<p>এখনো কোন প্রশ্ন নেই। প্রথম প্রশ্ন করুন!</p>';
-                return;
-            }
-            container.innerHTML = questions.map(q => `
-                <div class="qa-card">
-                    <div class="question-header">
-                        <h3>${q.title}</h3>
-                        <span class="question-type ${q.type}">${q.type === 'human' ? 'মানুষ' : 'পশু'}</span>
+        async function loadQuestions() {
+            try {
+                const questions = await dbAPI.getQuestions();
+                const container = document.getElementById('qaContainer');
+                if (questions.length === 0) {
+                    container.innerHTML = '<p>এখনো কোন প্রশ্ন নেই। প্রথম প্রশ্ন করুন!</p>';
+                    return;
+                }
+                container.innerHTML = questions.map(q => `
+                    <div class="qa-card">
+                        <div class="question-header">
+                            <h3>${q.title}</h3>
+                            <span class="question-type ${q.type}">${q.type === 'human' ? 'মানুষ' : 'পশু'}</span>
+                        </div>
+                        <p><strong>প্রশ্ন:</strong> ${q.description}</p>
+                        <p><strong>বয়স:</strong> ${q.age || 'উল্লেখ নেই'}</p>
+                        <p><strong>তারিখ:</strong> ${new Date(q.createdAt).toLocaleDateString('bn-BD')}</p>
+                        ${q.answer ? `<p><strong>উত্তর:</strong> ${q.answer}</p>` : ''}
                     </div>
-                    <p><strong>প্রশ্ন:</strong> ${q.description}</p>
-                    <p><strong>বয়স:</strong> ${q.age || 'উল্লেখ নেই'}</p>
-                    <p><strong>তারিখ:</strong> ${new Date(q.createdAt).toLocaleDateString('bn-BD')}</p>
-                </div>
-            `).join('');
+                `).join('');
+            } catch (error) {
+                console.error('Error loading questions:', error);
+            }
         }
 
         // Three dot menu functions
@@ -586,21 +549,24 @@
             openModal('adminModal');
         }
 
-        function showDoctors() {
-            allDoctors = JSON.parse(localStorage.getItem('curafam_doctors') || '[]');
-            const container = document.getElementById('adminData');
-            container.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3>মোট ডাক্তার: ${allDoctors.length}</h3>
-                    <button class="btn" onclick="clearAllDoctors()" style="background: #dc2626; font-size: 0.9rem; padding: 0.5rem 1rem;">সব মুছে দিন</button>
-                </div>
-                <div style="margin-bottom: 1rem;">
-                    <input type="text" id="doctorSearch" placeholder="নাম, ফোন বা ID দিয়ে খুঁজুন..." style="width: 100%; padding: 0.8rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem;" oninput="searchDoctors()">
-                </div>
-                <div id="doctorsList" style="max-height: 400px; overflow-y: auto;">
-                    ${displayDoctorsList(allDoctors)}
-                </div>
-            `;
+        async function showDoctors() {
+            try {
+                allDoctors = await dbAPI.getDoctors();
+                const container = document.getElementById('adminData');
+                container.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3>মোট ডাক্তার: ${allDoctors.length}</h3>
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <input type="text" id="doctorSearch" placeholder="নাম, ফোন বা ID দিয়ে খুঁজুন..." style="width: 100%; padding: 0.8rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem;" oninput="searchDoctors()">
+                    </div>
+                    <div id="doctorsList" style="max-height: 400px; overflow-y: auto;">
+                        ${displayDoctorsList(allDoctors)}
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading doctors:', error);
+            }
         }
         
         function displayDoctorsList(doctors) {
@@ -612,13 +578,13 @@
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                         <div style="flex: 1;">
                             <div style="font-size: 1.1rem; font-weight: bold; color: #2E8B57; margin-bottom: 0.5rem;">${d.name}</div>
-                            <div style="color: #666; margin-bottom: 0.3rem;"><i class="fas fa-id-card"></i> <strong>ID:</strong> ${d.id}</div>
+                            <div style="color: #666; margin-bottom: 0.3rem;"><i class="fas fa-id-card"></i> <strong>ID:</strong> ${d._id}</div>
                             <div style="color: #666; margin-bottom: 0.3rem;"><i class="fas fa-envelope"></i> ${d.email}</div>
                             <div style="color: #666; margin-bottom: 0.3rem;"><i class="fas fa-phone"></i> ${d.phone}</div>
                             <div style="color: #666; margin-bottom: 0.3rem;"><i class="fas fa-stethoscope"></i> ${d.specialty}</div>
                             <div style="font-size: 0.9rem; color: #888;"><i class="fas fa-calendar"></i> ${new Date(d.createdAt).toLocaleDateString('bn-BD')}</div>
                         </div>
-                        <button onclick="deleteDoctor('${d.id}')" style="background: #dc2626; color: white; border: none; padding: 0.5rem; border-radius: 5px; cursor: pointer; margin-left: 1rem;" title="ডিলিট করুন">
+                        <button onclick="deleteDoctor('${d._id}')" style="background: #dc2626; color: white; border: none; padding: 0.5rem; border-radius: 5px; cursor: pointer; margin-left: 1rem;" title="ডিলিট করুন">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -638,7 +604,7 @@
                 d.name.toLowerCase().includes(searchTerm) ||
                 d.phone.includes(searchTerm) ||
                 d.email.toLowerCase().includes(searchTerm) ||
-                d.id.includes(searchTerm) ||
+                d._id.includes(searchTerm) ||
                 d.specialty.toLowerCase().includes(searchTerm)
             );
             
@@ -648,21 +614,7 @@
         let allDoctors = [];
         
         function deleteDoctor(doctorId) {
-            if (confirm('এই ডাক্তারকে মুছে দিতে চান?')) {
-                const doctors = JSON.parse(localStorage.getItem('curafam_doctors') || '[]');
-                const filteredDoctors = doctors.filter(d => d.id !== doctorId);
-                localStorage.setItem('curafam_doctors', JSON.stringify(filteredDoctors));
-                showDoctors();
-                alert('ডাক্তার মুছে দেওয়া হয়েছে!');
-            }
-        }
-
-        function clearAllDoctors() {
-            if (confirm('সব ডাক্তার মুছে দিতে চান? এটি পুনরায় ফেরত আনা যাবে না!')) {
-                localStorage.setItem('curafam_doctors', JSON.stringify([]));
-                showDoctors();
-                alert('সব ডাক্তার মুছে দেওয়া হয়েছে!');
-            }
+            alert('ডিলিট ফিচার শীঘ্রই আসছে!');
         }
 
         // Load dark mode preference
