@@ -86,14 +86,12 @@
         </div>
     </footer>
 
-    <script src="local-database.js"></script>
     <script>
-        let database;
         let allQuestions = [];
         let currentFilter = { type: 'all', status: 'all' };
+        const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:3005' : '';
 
         document.addEventListener('DOMContentLoaded', function() {
-            database = new LocalDatabase();
             loadQuestions();
         });
 
@@ -105,14 +103,26 @@
             hamburger.classList.toggle('active');
         }
 
-        function loadQuestions() {
+        async function loadQuestions() {
             document.getElementById('loadingMessage').style.display = 'block';
             
-            setTimeout(() => {
-                allQuestions = database.getAllQuestions();
-                displayQuestions(allQuestions);
+            try {
+                const response = await fetch(`${API_BASE}/api/questions`);
+                if (response.ok) {
+                    allQuestions = await response.json();
+                    displayQuestions(allQuestions);
+                } else {
+                    console.error('Failed to load questions');
+                    allQuestions = [];
+                    displayQuestions([]);
+                }
+            } catch (error) {
+                console.error('Error loading questions:', error);
+                allQuestions = [];
+                displayQuestions([]);
+            } finally {
                 document.getElementById('loadingMessage').style.display = 'none';
-            }, 500);
+            }
         }
 
         function displayQuestions(questions) {
@@ -127,7 +137,7 @@
             
             noQuestionsMsg.style.display = 'none';
             
-            const sortedQuestions = questions.sort((a, b) => new Date(b.askedAt) - new Date(a.askedAt));
+            const sortedQuestions = questions.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
             
             container.innerHTML = sortedQuestions.map(question => createQuestionCard(question)).join('');
         }
@@ -144,18 +154,18 @@
                 <div class="question-card">
                     <div class="question-header">
                         <span class="question-type ${typeClass}">${typeText}</span>
-                        <span class="question-date">${formatDate(question.askedAt)}</span>
+                        <span class="question-date">${formatDate(question.createdAt)}</span>
                     </div>
                     
                     <h3 class="question-title">${escapeHtml(question.title)}</h3>
-                    <p><strong>Patient:</strong> ${escapeHtml(patientInfo)}</p>
-                    <div class="question-content">${escapeHtml(question.content)}</div>
+                    <p><strong>Patient:</strong> ${escapeHtml(question.patientName)}${question.age ? `, ${question.age}` : ''}</p>
+                    <div class="question-content">${escapeHtml(question.description)}</div>
                     
                     ${question.answer ? `
                         <div class="answer-section">
                             <div class="answer-header">
                                 <span class="doctor-name">Dr. ${escapeHtml(question.answeredBy)}</span>
-                                <span class="answer-date">${formatDate(question.answeredAt)}</span>
+                                <span class="answer-date">${formatDate(question.answeredAt || question.createdAt)}</span>
                             </div>
                             <div class="answer-content">${escapeHtml(question.answer)}</div>
                         </div>
@@ -204,7 +214,7 @@
             if (searchTerm) {
                 filteredQuestions = filteredQuestions.filter(q => 
                     q.title.toLowerCase().includes(searchTerm) ||
-                    q.content.toLowerCase().includes(searchTerm) ||
+                    q.description.toLowerCase().includes(searchTerm) ||
                     q.patientName.toLowerCase().includes(searchTerm) ||
                     (q.answer && q.answer.toLowerCase().includes(searchTerm))
                 );
@@ -264,11 +274,7 @@
         }
 
         setInterval(() => {
-            const newQuestions = database.getAllQuestions();
-            if (newQuestions.length !== allQuestions.length) {
-                allQuestions = newQuestions;
-                applyFilters();
-            }
+            loadQuestions();
         }, 30000);
     </script>
 </body>

@@ -1,11 +1,55 @@
 // Global variables
+
+// LocalDatabase class for managing local storage
+class LocalDatabase {
+    constructor() {
+        this.doctors = JSON.parse(localStorage.getItem('doctors') || '[]');
+        this.questions = JSON.parse(localStorage.getItem('questions') || '[]');
+    }
+
+    getAllDoctors() {
+        return this.doctors;
+    }
+
+    getAllQuestions() {
+        return this.questions;
+    }
+
+    addDoctor(doctor) {
+        this.doctors.push(doctor);
+        localStorage.setItem('doctors', JSON.stringify(this.doctors));
+    }
+
+    addQuestion(question) {
+        this.questions.push(question);
+        localStorage.setItem('questions', JSON.stringify(this.questions));
+    }
+
+    updateQuestion(id, updatedQuestion) {
+        const index = this.questions.findIndex(q => q.id === id);
+        if (index !== -1) {
+            this.questions[index] = { ...this.questions[index], ...updatedQuestion };
+            localStorage.setItem('questions', JSON.stringify(this.questions));
+        }
+    }
+}
+
+// Global variables
 let database;
 let isDarkMode = false;
+
+// API configuration for production
+const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:3005' : 'https://your-production-url.com';
+// For GitHub Pages or static hosting, use your backend API URL
+// const API_BASE = 'https://your-backend-api.herokuapp.com';
 
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', function() {
     database = new LocalDatabase();
     updateStats();
+    
+    // Auto refresh stats every 30 seconds
+    setInterval(updateStats, 30000);
     
     // Check for saved dark mode preference
     if (localStorage.getItem('darkMode') === 'true') {
@@ -182,28 +226,63 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Update homepage statistics
-function updateStats() {
-    if (!database) return;
-    
-    const doctors = database.getAllDoctors();
-    const questions = database.getAllQuestions();
-    
-    // Doctor statistics
-    const totalDoctors = doctors.length;
-    const humanDoctors = doctors.filter(d => d.type === 'human').length;
-    const animalDoctors = doctors.filter(d => d.type === 'animal').length;
-    
-    // Question statistics
-    const totalQuestions = questions.length;
-    const answeredQuestions = questions.filter(q => q.answer).length;
-    
-    // Update DOM elements
-    updateElement('totalDoctors', totalDoctors);
-    updateElement('humanDoctors', humanDoctors);
-    updateElement('animalDoctors', animalDoctors);
-    updateElement('totalQuestions', totalQuestions);
-    updateElement('answeredQuestions', answeredQuestions);
+// Update homepage statistics from MongoDB API
+async function updateStats() {
+    try {
+        const response = await fetch(`${API_BASE}/api/stats`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            const stats = await response.json();
+            
+            // Update all statistics elements
+            updateElement('totalDoctors', stats.totalDoctors);
+            updateElement('publicTotalDoctors', stats.totalDoctors);
+            updateElement('totalQuestions', stats.totalQuestions);
+            updateElement('publicTotalQuestions', stats.totalQuestions);
+            updateElement('answeredQuestions', stats.answeredQuestions);
+            updateElement('publicAnsweredQuestions', stats.answeredQuestions);
+            
+            // Calculate and update success rate
+            const successRate = stats.totalQuestions > 0 ? Math.round((stats.answeredQuestions / stats.totalQuestions) * 100) : 0;
+            updateElement('successRate', successRate + '%');
+            updateElement('publicSuccessRate', successRate + '%');
+            
+            console.log('Stats updated from MongoDB:', stats);
+        } else {
+            console.error('Failed to fetch stats from API');
+            // Fallback to local database
+            updateStatsFromLocal();
+        }
+    } catch (error) {
+        console.error('Error fetching stats:', error);
+        // Fallback to local database
+        updateStatsFromLocal();
+    }
+}
+
+// Fallback function for local database
+function updateStatsFromLocal() {
+    if (database) {
+        const doctors = database.getAllDoctors();
+        const questions = database.getAllQuestions();
+        const answeredQuestions = questions.filter(q => q.answer);
+        
+        updateElement('totalDoctors', doctors.length);
+        updateElement('publicTotalDoctors', doctors.length);
+        updateElement('totalQuestions', questions.length);
+        updateElement('publicTotalQuestions', questions.length);
+        updateElement('answeredQuestions', answeredQuestions.length);
+        updateElement('publicAnsweredQuestions', answeredQuestions.length);
+        
+        const successRate = questions.length > 0 ? Math.round((answeredQuestions.length / questions.length) * 100) : 0;
+        updateElement('successRate', successRate + '%');
+        updateElement('publicSuccessRate', successRate + '%');
+    }
 }
 
 function updateElement(id, value) {
@@ -268,6 +347,12 @@ function showLoading(element) {
 }
 
 // Hide loading state
+function hideLoading(element, originalText = 'সাবমিট করুন') {
+    if (element) {
+        element.innerHTML = originalText;
+        element.disabled = false;
+    }
+}e
 function hideLoading(element, originalText) {
     if (element) {
         element.innerHTML = originalText;

@@ -347,6 +347,7 @@
     </footer>
 
     <script src="database.js"></script>
+    <script src="script.js"></script>
     <script>
         // Initialize Database API
         const dbAPI = new DatabaseAPI();
@@ -386,16 +387,32 @@
         
 
         
-        // Load public statistics
+        // Load public statistics from MongoDB API
         async function loadPublicStats() {
             try {
-                const stats = await dbAPI.getStats();
-                document.getElementById('publicTotalQuestions').textContent = stats.totalQuestions;
-                document.getElementById('publicAnsweredQuestions').textContent = stats.answeredQuestions;
-                document.getElementById('publicTotalDoctors').textContent = stats.totalDoctors;
-                document.getElementById('publicSuccessRate').textContent = stats.successRate + '%';
+                const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:3005' : '';
+                const response = await fetch(`${API_BASE}/api/stats`);
+                
+                if (response.ok) {
+                    const stats = await response.json();
+                    document.getElementById('publicTotalQuestions').textContent = stats.totalQuestions;
+                    document.getElementById('publicAnsweredQuestions').textContent = stats.answeredQuestions;
+                    document.getElementById('publicTotalDoctors').textContent = stats.totalDoctors;
+                    document.getElementById('publicSuccessRate').textContent = stats.successRate + '%';
+                } else {
+                    // Fallback values if API fails
+                    document.getElementById('publicTotalQuestions').textContent = '0';
+                    document.getElementById('publicAnsweredQuestions').textContent = '0';
+                    document.getElementById('publicTotalDoctors').textContent = '0';
+                    document.getElementById('publicSuccessRate').textContent = '0%';
+                }
             } catch (error) {
                 console.error('Error loading stats:', error);
+                // Fallback values if API fails
+                document.getElementById('publicTotalQuestions').textContent = '0';
+                document.getElementById('publicAnsweredQuestions').textContent = '0';
+                document.getElementById('publicTotalDoctors').textContent = '0';
+                document.getElementById('publicSuccessRate').textContent = '0%';
             }
         }
 
@@ -420,20 +437,30 @@
                 };
                 
                 try {
-                    const question = await dbAPI.addQuestion(questionData);
-                    addDoctorNotification(question);
+                    const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:3005' : '';
+                    const response = await fetch(`${API_BASE}/api/questions`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(questionData)
+                    });
                     
-                    if ('Notification' in window && Notification.permission === 'granted') {
-                        alert('আপনার প্রশ্ন জমা হয়েছে! ডাক্তারদের নোটিফিকেশন পাঠানো হয়েছে!');
+                    if (response.ok) {
+                        const question = await response.json();
+                        addDoctorNotification(question);
+                        
+                        alert('আপনার প্রশ্ন সফলভাবে জমা হয়েছে! শীঘ্রই ডাক্তারদের কাছ থেকে উত্তর পাবেন।');
+                        
+                        this.reset();
+                        closeModal('askQuestionModal');
+                        loadQuestions();
+                        loadPublicStats();
                     } else {
-                        alert('আপনার প্রশ্ন জমা হয়েছে!');
+                        alert('প্রশ্ন জমা দিতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
                     }
-                    
-                    this.reset();
-                    closeModal('askQuestionModal');
-                    loadQuestions();
-                    loadPublicStats();
                 } catch (error) {
+                    console.error('Error submitting question:', error);
                     alert('প্রশ্ন জমা দিতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
                 }
             });
@@ -448,12 +475,25 @@
                 };
                 
                 try {
-                    await dbAPI.addDoctor(doctorData);
-                    alert('ডাক্তার রেজিস্ট্রেশন সফল হয়েছে!');
-                    this.reset();
-                    closeModal('doctorPortalModal');
-                    loadPublicStats();
+                    const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:3005' : '';
+                    const response = await fetch(`${API_BASE}/api/doctors`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(doctorData)
+                    });
+                    
+                    if (response.ok) {
+                        alert('ডাক্তার রেজিস্ট্রেশন সফল হয়েছে!');
+                        this.reset();
+                        closeModal('doctorPortalModal');
+                        loadPublicStats();
+                    } else {
+                        alert('রেজিস্ট্রেশনে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+                    }
                 } catch (error) {
+                    console.error('Error registering doctor:', error);
                     alert('রেজিস্ট্রেশনে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
                 }
             });
@@ -474,26 +514,35 @@
 
         async function loadQuestions() {
             try {
-                const questions = await dbAPI.getQuestions();
-                const container = document.getElementById('qaContainer');
-                if (questions.length === 0) {
-                    container.innerHTML = '<p>এখনো কোন প্রশ্ন নেই। প্রথম প্রশ্ন করুন!</p>';
-                    return;
-                }
-                container.innerHTML = questions.map(q => `
-                    <div class="qa-card">
-                        <div class="question-header">
-                            <h3>${q.title}</h3>
-                            <span class="question-type ${q.type}">${q.type === 'human' ? 'মানুষ' : 'পশু'}</span>
+                const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:3005' : '';
+                const response = await fetch(`${API_BASE}/api/questions`);
+                
+                if (response.ok) {
+                    const questions = await response.json();
+                    const container = document.getElementById('qaContainer');
+                    if (questions.length === 0) {
+                        container.innerHTML = '<p>এখনো কোন প্রশ্ন নেই। প্রথম প্রশ্ন করুন!</p>';
+                        return;
+                    }
+                    container.innerHTML = questions.map(q => `
+                        <div class="qa-card">
+                            <div class="question-header">
+                                <h3>${q.title}</h3>
+                                <span class="question-type ${q.type}">${q.type === 'human' ? 'মানুষ' : 'পশু'}</span>
+                            </div>
+                            <p><strong>রোগী:</strong> ${q.patientName}</p>
+                            <p><strong>প্রশ্ন:</strong> ${q.description}</p>
+                            <p><strong>বয়স:</strong> ${q.age || 'উল্লেখ নেই'}</p>
+                            <p><strong>তারিখ:</strong> ${new Date(q.createdAt).toLocaleDateString('bn-BD')}</p>
+                            ${q.answer ? `<p><strong>উত্তর:</strong> ${q.answer}</p><p><strong>ডাক্তার:</strong> ${q.answeredBy}</p>` : '<p style="color: #dc2626;"><strong>অপেক্ষমাণ:</strong> এখনো উত্তর দেওয়া হয়নি</p>'}
                         </div>
-                        <p><strong>প্রশ্ন:</strong> ${q.description}</p>
-                        <p><strong>বয়স:</strong> ${q.age || 'উল্লেখ নেই'}</p>
-                        <p><strong>তারিখ:</strong> ${new Date(q.createdAt).toLocaleDateString('bn-BD')}</p>
-                        ${q.answer ? `<p><strong>উত্তর:</strong> ${q.answer}</p>` : ''}
-                    </div>
-                `).join('');
+                    `).join('');
+                } else {
+                    document.getElementById('qaContainer').innerHTML = '<p>প্রশ্ন লোড করতে সমস্যা হয়েছে।</p>';
+                }
             } catch (error) {
                 console.error('Error loading questions:', error);
+                document.getElementById('qaContainer').innerHTML = '<p>প্রশ্ন লোড করতে সমস্যা হয়েছে।</p>';
             }
         }
 
@@ -528,21 +577,29 @@
 
         async function showDoctors() {
             try {
-                allDoctors = await dbAPI.getDoctors();
-                const container = document.getElementById('adminData');
-                container.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <h3>মোট ডাক্তার: ${allDoctors.length}</h3>
-                    </div>
-                    <div style="margin-bottom: 1rem;">
-                        <input type="text" id="doctorSearch" placeholder="নাম, ফোন বা ID দিয়ে খুঁজুন..." style="width: 100%; padding: 0.8rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem;" oninput="searchDoctors()">
-                    </div>
-                    <div id="doctorsList" style="max-height: 400px; overflow-y: auto;">
-                        ${displayDoctorsList(allDoctors)}
-                    </div>
-                `;
+                const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:3005' : '';
+                const response = await fetch(`${API_BASE}/api/doctors`);
+                
+                if (response.ok) {
+                    allDoctors = await response.json();
+                    const container = document.getElementById('adminData');
+                    container.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3>মোট ডাক্তার: ${allDoctors.length}</h3>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <input type="text" id="doctorSearch" placeholder="নাম, ফোন বা ID দিয়ে খুঁজুন..." style="width: 100%; padding: 0.8rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem;" oninput="searchDoctors()">
+                        </div>
+                        <div id="doctorsList" style="max-height: 400px; overflow-y: auto;">
+                            ${displayDoctorsList(allDoctors)}
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('adminData').innerHTML = '<p>ডাক্তারদের তথ্য লোড করতে সমস্যা হয়েছে।</p>';
+                }
             } catch (error) {
                 console.error('Error loading doctors:', error);
+                document.getElementById('adminData').innerHTML = '<p>ডাক্তারদের তথ্য লোড করতে সমস্যা হয়েছে।</p>';
             }
         }
         

@@ -148,13 +148,12 @@
         </div>
     </footer>
 
-    <script src="local-database.js"></script>
     <script>
-        let database;
         let currentType = 'human';
+        const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:3005' : '';
 
         document.addEventListener('DOMContentLoaded', function() {
-            database = new LocalDatabase();
+            // Initialize form
         });
 
         function toggleMobileMenu() {
@@ -183,43 +182,51 @@
             }
         }
 
-        document.getElementById('questionForm').addEventListener('submit', function(e) {
+        document.getElementById('questionForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const formData = new FormData(this);
             const questionData = {
                 type: currentType,
                 patientName: formData.get('patientName'),
-                patientAge: formData.get('patientAge'),
-                patientGender: currentType === 'human' ? formData.get('patientGender') : null,
-                animalSpecies: currentType === 'animal' ? formData.get('animalSpecies') : null,
+                age: formData.get('patientAge'),
                 title: formData.get('questionTitle'),
-                content: formData.get('questionContent'),
-                contactInfo: formData.get('contactInfo')
+                description: formData.get('questionContent')
             };
 
-            const validation = database.validateQuestion(questionData);
-            if (!validation.isValid) {
-                alert('Error:\n' + validation.errors.join('\n'));
+            // Basic validation
+            if (!questionData.patientName || !questionData.title || !questionData.description) {
+                alert('Please fill in all required fields.');
                 return;
             }
 
-            const result = database.addQuestion(questionData);
-            
-            if (result.success) {
-                alert('Your question has been submitted successfully! You will receive answers from doctors soon.');
-                this.reset();
-                
-                currentType = 'human';
-                document.getElementById('typeToggle').classList.remove('active');
-                document.getElementById('genderGroup').style.display = 'block';
-                document.getElementById('speciesGroup').style.display = 'none';
-                
-                setTimeout(() => {
-                    window.location.href = 'browse-qa.html';
-                }, 2000);
-            } else {
-                alert('There was a problem submitting your question. Please try again.');
+            try {
+                const response = await fetch(`${API_BASE}/api/questions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(questionData)
+                });
+
+                if (response.ok) {
+                    alert('আপনার প্রশ্ন সফলভাবে জমা দেওয়া হয়েছে! শীঘ্রই ডাক্তারদের কাছ থেকে উত্তর পাবেন।');
+                    this.reset();
+                    
+                    currentType = 'human';
+                    document.getElementById('typeToggle').classList.remove('active');
+                    document.getElementById('genderGroup').style.display = 'block';
+                    document.getElementById('speciesGroup').style.display = 'none';
+                    
+                    setTimeout(() => {
+                        window.location.href = 'browse-qa.html';
+                    }, 2000);
+                } else {
+                    alert('প্রশ্ন জমা দিতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+                }
+            } catch (error) {
+                console.error('Error submitting question:', error);
+                alert('প্রশ্ন জমা দিতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
             }
         });
     </script>
