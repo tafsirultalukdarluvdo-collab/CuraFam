@@ -12,12 +12,15 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('.'));
 
-// MongoDB Connection with better error handling
+// MongoDB Connection with Render-optimized settings
 const MONGODB_URI = 'mongodb+srv://tafsirultalukdarluvdo_db_user:zQ9SiqkGQK7gCebT@cluster0.ggkbd2f.mongodb.net/curafam?retryWrites=true&w=majority&appName=Cluster0';
 
 mongoose.connect(MONGODB_URI, {
-  serverSelectionTimeoutMS: 5000,
-  socketTimeoutMS: 45000,
+  serverSelectionTimeoutMS: 30000,
+  socketTimeoutMS: 75000,
+  maxPoolSize: 10,
+  retryWrites: true,
+  authSource: 'admin'
 })
   .then(() => console.log('MongoDB connected successfully'))
   .catch(err => {
