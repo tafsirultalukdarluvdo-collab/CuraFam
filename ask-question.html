@@ -150,7 +150,7 @@
 
     <script>
         let currentType = 'human';
-        const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:3005' : '';
+        const API_BASE = 'https://curafam.onrender.com';
 
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize form
@@ -222,11 +222,12 @@
                         window.location.href = 'browse-qa.html';
                     }, 2000);
                 } else {
-                    alert('প্রশ্ন জমা দিতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+                    const errorData = await response.json().catch(() => ({}));
+                    alert('প্রশ্ন জমা দিতে সমস্যা হয়েছে: ' + (errorData.error || 'Server error'));
                 }
             } catch (error) {
                 console.error('Error submitting question:', error);
-                alert('প্রশ্ন জমা দিতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+                alert('প্রশ্ন জমা দিতে সমস্যা হয়েছে। ইন্টারনেট সংযোগ চেক করুন এবং আবার চেষ্টা করুন।');
             }
         });
     </script>
