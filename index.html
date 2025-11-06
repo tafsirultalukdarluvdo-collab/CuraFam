@@ -353,17 +353,6 @@
         
         // Notification functions
         function addDoctorNotification(question) {
-            const notifications = JSON.parse(localStorage.getItem('curafam_notifications') || '[]');
-            const newNotification = {
-                id: Date.now().toString(),
-                questionId: question._id,
-                title: question.title,
-                type: question.type,
-                createdAt: new Date().toISOString(),
-                read: false
-            };
-            notifications.unshift(newNotification);
-            localStorage.setItem('curafam_notifications', JSON.stringify(notifications));
             sendPushNotification(question);
         }
         
@@ -395,18 +384,7 @@
                 }
             }
         
-        function getNotifications() {
-            return JSON.parse(localStorage.getItem('curafam_notifications') || '[]');
-        }
-        
-        function markNotificationRead(notificationId) {
-            const notifications = getNotifications();
-            const notification = notifications.find(n => n.id === notificationId);
-            if (notification) {
-                notification.read = true;
-                localStorage.setItem('curafam_notifications', JSON.stringify(notifications));
-            }
-        }
+
         
         // Load public statistics
         async function loadPublicStats() {
@@ -528,7 +506,6 @@
         function toggleDarkMode() {
             document.body.classList.toggle('dark-mode');
             const isDark = document.body.classList.contains('dark-mode');
-            localStorage.setItem('darkMode', isDark);
             alert(isDark ? 'ডার্ক মোড চালু!' : 'লাইট মোড চালু!');
         }
 
@@ -617,10 +594,7 @@
             alert('ডিলিট ফিচার শীঘ্রই আসছে!');
         }
 
-        // Load dark mode preference
-        if (localStorage.getItem('darkMode') === 'true') {
-            document.body.classList.add('dark-mode');
-        }
+
         
         // Load public stats on page load
         loadPublicStats();

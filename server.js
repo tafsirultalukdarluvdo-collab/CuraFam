@@ -5,7 +5,7 @@ const cors = require('cors');
 const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 3002;
+const PORT = process.env.PORT || 3005;
 
 // Middleware
 app.use(cors());
@@ -13,9 +13,9 @@ app.use(express.json());
 app.use(express.static('.'));
 
 // MongoDB Connection
-const MONGODB_URI = 'mongodb+srv://tafsirultalukdarluvdo_db_user:<db_password>@cluster0.ggkbd2f.mongodb.net/curafam?retryWrites=true&w=majority&appName=Cluster0';
+const MONGODB_URI = 'mongodb+srv://tafsirultalukdarluvdo_db_user:zQ9SiqkGQK7gCebT@cluster0.ggkbd2f.mongodb.net/curafam?retryWrites=true&w=majority&appName=Cluster0';
 
-mongoose.connect(MONGODB_URI.replace('<db_password>', process.env.DB_PASSWORD || 'your_password_here'))
+mongoose.connect(MONGODB_URI)
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB connection error:', err));
 

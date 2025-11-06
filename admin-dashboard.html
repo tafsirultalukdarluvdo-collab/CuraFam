@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - All Device Data</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-container { max-width: 1200px; margin: 20px auto; padding: 20px; }
+        .data-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .data-table th, .data-table td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        .data-table th { background-color: #f2f2f2; }
+        .device-info { background-color: #e8f4fd; padding: 5px; border-radius: 3px; }
+        .filter-section { margin: 20px 0; padding: 15px; background: #f9f9f9; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <h1>🔍 All Device Registration Data</h1>
+        
+        <div class="filter-section">
+            <h3>Filter Options:</h3>
+            <select id="deviceFilter">
+                <option value="all">All Devices</option>
+            </select>
+            <select id="typeFilter">
+                <option value="all">All Types</option>
+                <option value="human">Human Doctor</option>
+                <option value="animal">Animal Doctor</option>
+            </select>
+            <button onclick="loadData()">🔄 Refresh Data</button>
+        </div>
+
+        <div id="statsSection">
+            <h3>📊 Statistics:</h3>
+            <p>Total Registrations: <span id="totalCount">0</span></p>
+            <p>Unique Devices: <span id="deviceCount">0</span></p>
+            <p>Human Doctors: <span id="humanCount">0</span></p>
+            <p>Animal Doctors: <span id="animalCount">0</span></p>
+        </div>
+
+        <table class="data-table" id="dataTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Type</th>
+                    <th>BMDC</th>
+                    <th>Device Info</th>
+                    <th>Registration Time</th>
+                </tr>
+            </thead>
+            <tbody id="dataTableBody">
+                <!-- Data will be loaded here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        let mongoDb;
+
+        async function initializeDatabase() {
+            try {
+                mongoDb = new MongoDatabase();
+                const connected = await mongoDb.connect();
+                if (connected) {
+                    console.log('Connected to MongoDB');
+                    loadData();
+                } else {
+                    console.error('Failed to connect to MongoDB');
+                    // Fallback to local storage
+                    loadLocalData();
+                }
+            } catch (error) {
+                console.error('Database initialization error:', error);
+                loadLocalData();
+            }
+        }
+
+        async function loadData() {
+            try {
+                let doctors = [];
+                
+                if (mongoDb) {
+                    doctors = await mongoDb.getAllDoctors();
+                } else {
+                    // Fallback to local storage
+                    doctors = JSON.parse(localStorage.getItem('doctors') || '[]');
+                }
+
+                displayData(doctors);
+                updateStats(doctors);
+                updateDeviceFilter(doctors);
+            } catch (error) {
+                console.error('Error loading data:', error);
+            }
+        }
+
+        function loadLocalData() {
+            const doctors = JSON.parse(localStorage.getItem('doctors') || '[]');
+            displayData(doctors);
+            updateStats(doctors);
+            updateDeviceFilter(doctors);
+        }
+
+        function displayData(doctors) {
+            const tbody = document.getElementById('dataTableBody');
+            const deviceFilter = document.getElementById('deviceFilter').value;
+            const typeFilter = document.getElementById('typeFilter').value;
+
+            // Apply filters
+            let filteredDoctors = doctors;
+            if (deviceFilter !== 'all') {
+                filteredDoctors = filteredDoctors.filter(d => 
+                    d.deviceInfo && d.deviceInfo.deviceId === deviceFilter
+                );
+            }
+            if (typeFilter !== 'all') {
+                filteredDoctors = filteredDoctors.filter(d => d.type === typeFilter);
+            }
+
+            tbody.innerHTML = '';
+            filteredDoctors.forEach(doctor => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${doctor.name || 'N/A'}</td>
+                    <td>${doctor.phone || 'N/A'}</td>
+                    <td>${doctor.email || 'N/A'}</td>
+                    <td>${doctor.type === 'human' ? 'Human' : 'Animal'}</td>
+                    <td>${doctor.bmdc || 'N/A'}</td>
+                    <td class="device-info">
+                        Device: ${doctor.deviceInfo?.deviceId?.substring(0, 15) || 'Unknown'}...<br>
+                        Time: ${doctor.deviceInfo?.timestamp ? new Date(doctor.deviceInfo.timestamp).toLocaleString() : 'N/A'}
+                    </td>
+                    <td>${doctor.registeredAt ? new Date(doctor.registeredAt).toLocaleString() : 'N/A'}</td>
+                `;
+            });
+        }
+
+        function updateStats(doctors) {
+            document.getElementById('totalCount').textContent = doctors.length;
+            
+            const uniqueDevices = new Set(doctors.map(d => d.deviceInfo?.deviceId).filter(Boolean));
+            document.getElementById('deviceCount').textContent = uniqueDevices.size;
+            
+            const humanCount = doctors.filter(d => d.type === 'human').length;
+            const animalCount = doctors.filter(d => d.type === 'animal').length;
+            
+            document.getElementById('humanCount').textContent = humanCount;
+            document.getElementById('animalCount').textContent = animalCount;
+        }
+
+        function updateDeviceFilter(doctors) {
+            const deviceFilter = document.getElementById('deviceFilter');
+            const uniqueDevices = new Set(doctors.map(d => d.deviceInfo?.deviceId).filter(Boolean));
+            
+            // Clear existing options except "All Devices"
+            deviceFilter.innerHTML = '<option value="all">All Devices</option>';
+            
+            uniqueDevices.forEach(deviceId => {
+                const option = document.createElement('option');
+                option.value = deviceId;
+                option.textContent = `Device: ${deviceId.substring(0, 20)}...`;
+                deviceFilter.appendChild(option);
+            });
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load MongoDB config if available
+            const script = document.createElement('script');
+            script.src = 'mongodb-config.js';
+            script.onload = initializeDatabase;
+            script.onerror = loadLocalData;
+            document.head.appendChild(script);
+        });
+    </script>
+</body>
+</html>
