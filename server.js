@@ -12,12 +12,27 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('.'));
 
-// MongoDB Connection
+// MongoDB Connection with better error handling
 const MONGODB_URI = 'mongodb+srv://tafsirultalukdarluvdo_db_user:zQ9SiqkGQK7gCebT@cluster0.ggkbd2f.mongodb.net/curafam?retryWrites=true&w=majority&appName=Cluster0';
 
-mongoose.connect(MONGODB_URI)
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.error('MongoDB connection error:', err));
+mongoose.connect(MONGODB_URI, {
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+})
+  .then(() => console.log('MongoDB connected successfully'))
+  .catch(err => {
+    console.error('MongoDB connection error:', err);
+    process.exit(1);
+  });
+
+// Handle MongoDB connection events
+mongoose.connection.on('error', err => {
+  console.error('MongoDB connection error:', err);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.log('MongoDB disconnected');
+});
 
 // Schemas
 const questionSchema = new mongoose.Schema({
@@ -96,8 +111,22 @@ app.put('/api/questions/:id/answer', async (req, res) => {
   }
 });
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+  });
+});
+
 app.get('/api/stats', async (req, res) => {
   try {
+    // Check MongoDB connection
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ error: 'Database not connected' });
+    }
+
     const totalQuestions = await Question.countDocuments();
     const answeredQuestions = await Question.countDocuments({ answer: { $exists: true, $ne: '' } });
     const totalDoctors = await Doctor.countDocuments();
@@ -110,7 +139,8 @@ app.get('/api/stats', async (req, res) => {
       successRate
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Stats API error:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
