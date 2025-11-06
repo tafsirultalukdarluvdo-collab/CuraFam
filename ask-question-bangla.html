@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>প্রশ্ন করুন - CuraFam</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-logo">
+                    <a href="index.html" style="color: white; text-decoration: none;">
+                        <h2>CuraFam</h2>
+                    </a>
+                </div>
+                
+                <ul class="nav-menu">
+                    <li class="nav-item"><a href="index.html" class="nav-link">হোম</a></li>
+                    <li class="nav-item"><a href="browse-qa.html" class="nav-link">প্রশ্ন ও উত্তর</a></li>
+                    <li class="nav-item"><a href="doctor-portal.html" class="nav-link">ডাক্তার পোর্টাল</a></li>
+                    <li class="nav-item"><a href="emergency.html" class="nav-link">জরুরি সেবা</a></li>
+                </ul>
+
+                <div class="hamburger" onclick="toggleMobileMenu()">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="form-container">
+                <h1>প্রশ্ন করুন</h1>
+                <p>আপনার স্বাস্থ্য সমস্যার জন্য বিনামূল্যে চিকিৎসা পরামর্শ নিন</p>
+
+                <div class="toggle-container">
+                    <span>মানুষের স্বাস্থ্য</span>
+                    <div class="toggle-switch" id="typeToggle" onclick="toggleQuestionType()">
+                        <div class="toggle-slider"></div>
+                    </div>
+                    <span>পশুর স্বাস্থ্য</span>
+                </div>
+
+                <form id="questionForm">
+                    <div class="form-group">
+                        <label for="patientName">রোগীর নাম *</label>
+                        <input type="text" id="patientName" name="patientName" required placeholder="রোগীর নাম লিখুন">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="patientAge">বয়স</label>
+                        <input type="text" id="patientAge" name="patientAge" placeholder="যেমন: ২৫ বছর বা ৩ মাস">
+                    </div>
+
+                    <div class="form-group" id="genderGroup">
+                        <label for="patientGender">লিঙ্গ</label>
+                        <select id="patientGender" name="patientGender">
+                            <option value="">নির্বাচন করুন</option>
+                            <option value="male">পুরুষ</option>
+                            <option value="female">মহিলা</option>
+                            <option value="other">অন্যান্য</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="speciesGroup" style="display: none;">
+                        <label for="animalSpecies">পশুর প্রজাতি</label>
+                        <select id="animalSpecies" name="animalSpecies">
+                            <option value="">নির্বাচন করুন</option>
+                            <option value="dog">কুকুর</option>
+                            <option value="cat">বিড়াল</option>
+                            <option value="cow">গরু</option>
+                            <option value="goat">ছাগল</option>
+                            <option value="chicken">মুরগি</option>
+                            <option value="bird">পাখি</option>
+                            <option value="fish">মাছ</option>
+                            <option value="other">অন্যান্য</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="questionTitle">প্রশ্নের শিরোনাম *</label>
+                        <input type="text" id="questionTitle" name="questionTitle" 
+                               placeholder="সংক্ষেপে আপনার সমস্যা বর্ণনা করুন" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="questionContent">বিস্তারিত বিবরণ *</label>
+                        <textarea id="questionContent" name="questionContent" 
+                                  placeholder="আপনার সমস্যার বিস্তারিত বিবরণ দিন। লক্ষণ, কতদিন ধরে, কোন চিকিৎসা নিয়েছেন ইত্যাদি লিখুন" 
+                                  required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contactInfo">যোগাযোগের তথ্য (ঐচ্ছিক)</label>
+                        <input type="text" id="contactInfo" name="contactInfo" 
+                               placeholder="ফোন নম্বর বা ইমেইল (জরুরি যোগাযোগের জন্য)">
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="privacyConsent" required>
+                            আমি সম্মত যে আমার প্রশ্ন ও উত্তর অন্যদের সাহায্যের জন্য প্রকাশ করা হতে পারে (ব্যক্তিগত তথ্য গোপনীয় রাখা হবে)
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="submitBtn">প্রশ্ন জমা দিন</button>
+                </form>
+
+                <div class="form-info">
+                    <h3>গুরুত্বপূর্ণ তথ্য:</h3>
+                    <ul>
+                        <li>✅ সম্পূর্ণ বিনামূল্যে সেবা</li>
+                        <li>✅ ২৪ ঘন্টার মধ্যে উত্তর পাবেন</li>
+                        <li>✅ যোগ্য ও অভিজ্ঞ ডাক্তারদের পরামর্শ</li>
+                        <li>⚠️ জরুরি অবস্থায় সরাসরি হাসপাতালে যান</li>
+                        <li>⚠️ এই পরামর্শ সরাসরি চিকিৎসার বিকল্প নয়</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>CuraFam</h3>
+                    <p>আপনার পরিবারের স্বাস্থ্য সেবা</p>
+                </div>
+                <div class="footer-section">
+                    <h4>দ্রুত লিংক</h4>
+                    <ul>
+                        <li><a href="index.html">হোম</a></li>
+                        <li><a href="browse-qa.html">উত্তর ব্রাউজ করুন</a></li>
+                        <li><a href="doctor-portal.html">ডাক্তার পোর্টাল</a></li>
+                        <li><a href="emergency.html">জরুরি সেবা</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 CuraFam. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let currentType = 'human';
+        const API_BASE = 'https://curafam.onrender.com';
+
+        function toggleMobileMenu() {
+            const navMenu = document.querySelector('.nav-menu');
+            const hamburger = document.querySelector('.hamburger');
+            
+            navMenu.classList.toggle('active');
+            hamburger.classList.toggle('active');
+        }
+
+        function toggleQuestionType() {
+            const toggle = document.getElementById('typeToggle');
+            const genderGroup = document.getElementById('genderGroup');
+            const speciesGroup = document.getElementById('speciesGroup');
+            
+            toggle.classList.toggle('active');
+            
+            if (toggle.classList.contains('active')) {
+                currentType = 'animal';
+                genderGroup.style.display = 'none';
+                speciesGroup.style.display = 'block';
+            } else {
+                currentType = 'human';
+                genderGroup.style.display = 'block';
+                speciesGroup.style.display = 'none';
+            }
+        }
+
+        document.getElementById('questionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.textContent;
+            
+            // Show loading
+            submitBtn.textContent = 'জমা দেওয়া হচ্ছে...';
+            submitBtn.disabled = true;
+            
+            const formData = new FormData(this);
+            const questionData = {
+                type: currentType,
+                patientName: formData.get('patientName'),
+                age: formData.get('patientAge'),
+                title: formData.get('questionTitle'),
+                description: formData.get('questionContent')
+            };
+
+            // Basic validation
+            if (!questionData.patientName || !questionData.title || !questionData.description) {
+                alert('অনুগ্রহ করে সব প্রয়োজনীয় ক্ষেত্র পূরণ করুন।');
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/api/questions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(questionData)
+                });
+
+                if (response.ok) {
+                    alert('আপনার প্রশ্ন সফলভাবে জমা দেওয়া হয়েছে! শীঘ্রই ডাক্তারদের কাছ থেকে উত্তর পাবেন।');
+                    this.reset();
+                    
+                    currentType = 'human';
+                    document.getElementById('typeToggle').classList.remove('active');
+                    document.getElementById('genderGroup').style.display = 'block';
+                    document.getElementById('speciesGroup').style.display = 'none';
+                    
+                    setTimeout(() => {
+                        window.location.href = 'browse-qa.html';
+                    }, 2000);
+                } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    alert('প্রশ্ন জমা দিতে সমস্যা হয়েছে: ' + (errorData.error || 'Server error'));
+                }
+            } catch (error) {
+                console.error('Error submitting question:', error);
+                alert('প্রশ্ন জমা দিতে সমস্যা হয়েছে। ইন্টারনেট সংযোগ চেক করুন এবং আবার চেষ্টা করুন।');
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
