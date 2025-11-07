@@ -39,9 +39,7 @@ let database;
 let isDarkMode = false;
 
 // API configuration for production
-const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:3005' : 'https://your-production-url.com';
-// For GitHub Pages or static hosting, use your backend API URL
-// const API_BASE = 'https://your-backend-api.herokuapp.com';
+const API_BASE = 'https://curafam.onrender.com';
 
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', function() {
@@ -347,6 +345,31 @@ function showLoading(element) {
 }
 
 // Hide loading state
+function hideLoading(element, originalText = 'সাবমিট করুন') {
+    if (element) {
+        element.innerHTML = originalText;
+        element.disabled = false;
+    }
+}
+
+// Health type selection dropdown
+function createHealthTypeDropdown(containerId) {
+    const container = document.getElementById(containerId);
+    if (container) {
+        container.innerHTML = `
+            <select id="healthTypeSelect" style="padding: 0.8rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; width: 100%;">
+                <option value="human">👨 মানুষের স্বাস্থ্য</option>
+                <option value="animal">🐶 পশুর স্বাস্থ্য</option>
+            </select>
+        `;
+    }
+}
+
+// Get selected health type
+function getSelectedHealthType() {
+    const select = document.getElementById('healthTypeSelect');
+    return select ? select.value : 'human';
+}e
 function hideLoading(element, originalText = 'সাবমিট করুন') {
     if (element) {
         element.innerHTML = originalText;
