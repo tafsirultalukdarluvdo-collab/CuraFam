@@ -94,42 +94,7 @@
     </style>
 </head>
 <body>
-    <!-- Ask Question Modal -->
-    <div id="askQuestionModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('askQuestionModal')">&times;</span>
-            <h2 style="text-align: center; color: #2E8B57; margin-bottom: 2rem;"><i class="fas fa-question-circle"></i> প্রশ্ন করুন</h2>
-            <p style="text-align: center; color: #666; margin-bottom: 2rem;">বিশেষজ্ঞ ডাক্তারদের কাছ থেকে বিনামূল্যে পরামর্শ নিন</p>
-            <form id="questionForm">
-                <div class="form-group">
-                    <label style="font-size: 1.1rem; color: #2E8B57;"><i class="fas fa-user"></i> প্রশ্নের ধরন *</label>
-                    <select id="questionType" style="font-size: 1rem; padding: 1rem;">
-                        <option value="human">👨 মানুষের স্বাস্থ্য</option>
-                        <option value="animal">🐶 পশুর স্বাস্থ্য</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="questionTitle" style="font-size: 1.1rem; color: #2E8B57;"><i class="fas fa-edit"></i> প্রশ্নের শিরোনাম *</label>
-                    <input type="text" id="questionTitle" required placeholder="যেমন: পেটে ব্যথা, জ্বর, সর্দি ইত্যাদি" style="font-size: 1rem; padding: 1rem;">
-                </div>
-                <div class="form-group">
-                    <label for="patientName" style="font-size: 1.1rem; color: #2E8B57;"><i class="fas fa-user"></i> রোগীর নাম *</label>
-                    <input type="text" id="patientName" required placeholder="রোগীর নাম লিখুন" style="font-size: 1rem; padding: 1rem;">
-                </div>
-                <div class="form-group">
-                    <label for="questionDesc" style="font-size: 1.1rem; color: #2E8B57;"><i class="fas fa-file-alt"></i> বিস্তারিত বিবরণ *</label>
-                    <textarea id="questionDesc" required placeholder="কতদিন ধরে সমস্যা? কেমন লাগছে? অন্য কোন লক্ষণ? যত বিস্তারিত লিখবেন তত ভালো পরামর্শ পাবেন" style="font-size: 1rem; padding: 1rem; min-height: 120px;"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="patientAge">বয়স</label>
-                    <input type="text" id="patientAge" placeholder="যেমন: ২৫ বছর">
-                </div>
-                <button type="submit" class="btn" style="width: 100%; padding: 1.2rem; font-size: 1.1rem; background: linear-gradient(135deg, #2E8B57, #20B2AA);">
-                    <i class="fas fa-paper-plane"></i> প্রশ্ন জমা দিন
-                </button>
-            </form>
-        </div>
-    </div>
+
 
     <!-- Browse Q&A Modal -->
     <div id="browseQAModal" class="modal">
@@ -280,12 +245,12 @@
             <div class="container">
                 <h2>আমাদের সেবা</h2>
                 <div class="services-grid">
-                    <div class="service-card" onclick="openModal('askQuestionModal')">
+                    <div class="service-card" onclick="window.location.href='ask-question.html'">
                         <i class="fas fa-question-circle"></i>
                         <h3>প্রশ্ন করুন</h3>
                         <p>আপনার স্বাস্থ্য সমস্যা নিয়ে প্রশ্ন করুন</p>
                     </div>
-                    <div class="service-card" onclick="openModal('browseQAModal')">
+                    <div class="service-card" onclick="window.location.href='browse-qa.html'">
                         <i class="fas fa-search"></i>
                         <h3>উত্তর ব্রাউজ করুন</h3>
                         <p>অন্যদের প্রশ্ন ও উত্তর দেখুন</p>
@@ -426,46 +391,9 @@
 
         // Form submissions
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('questionForm').addEventListener('submit', async function(e) {
-                e.preventDefault();
-                const questionData = {
-                    type: document.getElementById('questionType').value,
-                    title: document.getElementById('questionTitle').value,
-                    patientName: document.getElementById('patientName').value,
-                    description: document.getElementById('questionDesc').value,
-                    age: document.getElementById('patientAge').value
-                };
-                
-                try {
-                    const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:3005' : '';
-                    const response = await fetch(`${API_BASE}/api/questions`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(questionData)
-                    });
-                    
-                    if (response.ok) {
-                        const question = await response.json();
-                        addDoctorNotification(question);
-                        
-                        alert('আপনার প্রশ্ন সফলভাবে জমা হয়েছে! শীঘ্রই ডাক্তারদের কাছ থেকে উত্তর পাবেন।');
-                        
-                        this.reset();
-                        closeModal('askQuestionModal');
-                        loadQuestions();
-                        loadPublicStats();
-                    } else {
-                        alert('প্রশ্ন জমা দিতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
-                    }
-                } catch (error) {
-                    console.error('Error submitting question:', error);
-                    alert('প্রশ্ন জমা দিতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
-                }
-            });
-
-            document.getElementById('doctorForm').addEventListener('submit', async function(e) {
+            const doctorForm = document.getElementById('doctorForm');
+            if (doctorForm) {
+                doctorForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 const doctorData = {
                     name: document.getElementById('doctorName').value,
