@@ -11,7 +11,8 @@
         <nav class="navbar">
             <div class="nav-container">
                 <div class="nav-logo">
-                    <a href="index.html" style="color: white; text-decoration: none;">
+                    <a href="index.html" style="color: white; text-decoration: none; display: flex; align-items: center;">
+                        <img src="logo.png.png" alt="CuraFam" style="height: 40px; margin-right: 10px;">
                         <h2>CuraFam</h2>
                     </a>
                 </div>
@@ -38,12 +39,12 @@
                 <h1>প্রশ্ন করুন</h1>
                 <p>আপনার স্বাস্থ্য সমস্যার জন্য বিনামূল্যে চিকিৎসা পরামর্শ নিন</p>
 
-                <div class="toggle-container">
-                    <span>মানুষের স্বাস্থ্য</span>
-                    <div class="toggle-switch" id="typeToggle" onclick="toggleQuestionType()">
-                        <div class="toggle-slider"></div>
-                    </div>
-                    <span>পশুর স্বাস্থ্য</span>
+                <div class="form-group">
+                    <label for="questionType">প্রশ্নের ধরন *</label>
+                    <select id="questionType" name="questionType" onchange="changeQuestionType()">
+                        <option value="human">👨 মানুষের স্বাস্থ্য</option>
+                        <option value="animal">🐶 পশুর স্বাস্থ্য</option>
+                    </select>
                 </div>
 
                 <form id="questionForm">
@@ -160,19 +161,17 @@
             hamburger.classList.toggle('active');
         }
 
-        function toggleQuestionType() {
-            const toggle = document.getElementById('typeToggle');
+        function changeQuestionType() {
+            const select = document.getElementById('questionType');
             const genderGroup = document.getElementById('genderGroup');
             const speciesGroup = document.getElementById('speciesGroup');
             
-            toggle.classList.toggle('active');
+            currentType = select.value;
             
-            if (toggle.classList.contains('active')) {
-                currentType = 'animal';
+            if (currentType === 'animal') {
                 genderGroup.style.display = 'none';
                 speciesGroup.style.display = 'block';
             } else {
-                currentType = 'human';
                 genderGroup.style.display = 'block';
                 speciesGroup.style.display = 'none';
             }
@@ -219,7 +218,7 @@
                     this.reset();
                     
                     currentType = 'human';
-                    document.getElementById('typeToggle').classList.remove('active');
+                    document.getElementById('questionType').value = 'human';
                     document.getElementById('genderGroup').style.display = 'block';
                     document.getElementById('speciesGroup').style.display = 'none';
                     
