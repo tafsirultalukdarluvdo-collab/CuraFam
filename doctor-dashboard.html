@@ -7,27 +7,251 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background: #f8fafc; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
-        header { background: linear-gradient(135deg, #2E8B57, #20B2AA); color: white; padding: 1rem 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        header .container { display: flex; justify-content: space-between; align-items: center; }
-        .logo h1 { font-size: 2rem; }
-        .btn { display: inline-block; padding: 0.8rem 1.5rem; background: #2E8B57; color: white; text-decoration: none; border-radius: 8px; transition: all 0.3s; border: none; cursor: pointer; }
-        .btn:hover { background: #236B43; transform: translateY(-2px); }
-        .btn-secondary { background: #20B2AA; }
-        .btn-danger { background: #dc2626; }
-        .dashboard { padding: 2rem 0; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-        .stat-card { background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; }
-        .stat-number { font-size: 2rem; font-weight: bold; color: #2E8B57; }
-        .qa-card { background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 1rem; }
-        .question-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
-        .question-type { padding: 0.3rem 0.8rem; border-radius: 15px; font-size: 0.8rem; font-weight: 600; }
-        .question-type.human { background: #dbeafe; color: #1e40af; }
-        .question-type.animal { background: #fef3c7; color: #d97706; }
-        .form-group { margin-bottom: 1rem; }
-        .form-group textarea { width: 100%; padding: 0.8rem; border: 2px solid #e5e7eb; border-radius: 8px; min-height: 100px; }
-        .no-questions { text-align: center; padding: 3rem; color: #666; }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            line-height: 1.6; 
+            color: #2c3e50;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 0 1rem; 
+        }
+        
+        header { 
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            color: #2c3e50; 
+            padding: 1rem 0; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        header .container { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        
+        .logo h1 { 
+            font-size: 2rem;
+            background: linear-gradient(135deg, #2E8B57, #20B2AA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .logo p {
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .btn { 
+            display: inline-block; 
+            padding: 0.8rem 1.5rem; 
+            background: linear-gradient(135deg, #2E8B57, #20B2AA);
+            color: white; 
+            text-decoration: none; 
+            border-radius: 25px;
+            transition: all 0.3s; 
+            border: none; 
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(46, 139, 87, 0.3);
+        }
+        
+        .btn:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(46, 139, 87, 0.4);
+        }
+        
+        .btn-secondary { 
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-danger { 
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
+        }
+        
+        .btn-danger:hover {
+            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
+        }
+        
+        .dashboard { 
+            padding: 2rem 0; 
+        }
+        
+        .stats-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+            gap: 1.5rem; 
+            margin-bottom: 2rem; 
+        }
+        
+        .stat-card { 
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 2rem; 
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        }
+        
+        .stat-number { 
+            font-size: 2.5rem; 
+            font-weight: bold;
+            background: linear-gradient(135deg, #2E8B57, #20B2AA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .qa-card { 
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+            border-left: 5px solid #2E8B57;
+            transition: all 0.3s;
+        }
+        
+        .qa-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        }
+        
+        .question-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-start; 
+            margin-bottom: 1rem; 
+        }
+        
+        .question-header h3 {
+            color: #2c3e50;
+            font-size: 1.3rem;
+        }
+        
+        .question-type { 
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .question-type.human { 
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .question-type.animal { 
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+        }
+        
+        .form-group { 
+            margin-bottom: 1rem; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        .form-group textarea { 
+            width: 100%; 
+            padding: 1rem;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 15px;
+            min-height: 120px;
+            font-family: inherit;
+            transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.9);
+        }
+        
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .no-questions { 
+            text-align: center; 
+            padding: 4rem 2rem;
+            color: #2c3e50;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .login-card h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+        
+        .login-card input {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 15px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.9);
+        }
+        
+        .login-card input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        #welcomeMessage {
+            color: white;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+        
+        h3 {
+            color: white;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            margin-bottom: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -46,10 +270,10 @@
 
     <main class="dashboard">
         <div class="container">
-            <div style="background: white; padding: 1rem; border-radius: 10px; margin-bottom: 2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <div class="login-card">
                 <h3>ডাক্তার লগইন</h3>
                 <div style="display: flex; gap: 1rem; align-items: center; margin-top: 1rem;">
-                    <input type="text" id="doctorIdInput" placeholder="আপনার ইউজার ID" style="flex: 1; padding: 0.8rem; border: 2px solid #e5e7eb; border-radius: 8px;">
+                    <input type="text" id="doctorIdInput" placeholder="আপনার ইউজার ID">
                     <button class="btn" onclick="loginDoctor()">লগইন</button>
                     <button class="btn btn-danger" onclick="logoutDoctor()">লগআউট</button>
                 </div>
@@ -99,6 +323,8 @@
     </main>
 
     <script>
+        const API_BASE = 'https://curafam.onrender.com';
+        
         class LocalDatabase {
             getQuestions() {
                 return JSON.parse(localStorage.getItem('curafam_questions') || '[]');
@@ -140,66 +366,108 @@
 
         const localDB = new LocalDatabase();
 
-        function loadDashboard() {
-            const questions = localDB.getQuestions();
-            const answered = questions.filter(q => q.answer);
-            const pending = questions.filter(q => !q.answer);
-            const notifications = localDB.getNotifications();
-            const unreadNotifications = notifications.filter(n => !n.read);
+        async function loadDashboard() {
+            console.log('Loading dashboard...');
+            try {
+                // Fetch questions from MongoDB server
+                console.log('Fetching from:', `${API_BASE}/api/questions`);
+                const response = await fetch(`${API_BASE}/api/questions`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch questions');
+                }
+                const questions = await response.json();
+                console.log('Questions fetched:', questions.length, questions);
+                
+                const answered = questions.filter(q => q.answer);
+                const pending = questions.filter(q => !q.answer);
+                console.log('Pending questions:', pending.length);
+                console.log('Answered questions:', answered.length);
+                
+                const notifications = localDB.getNotifications();
+                const unreadNotifications = notifications.filter(n => !n.read);
 
-            document.getElementById('totalQuestions').textContent = questions.length;
-            document.getElementById('answeredQuestions').textContent = answered.length;
-            document.getElementById('pendingQuestions').textContent = pending.length;
-            document.getElementById('newNotifications').textContent = unreadNotifications.length;
+                document.getElementById('totalQuestions').textContent = questions.length;
+                document.getElementById('answeredQuestions').textContent = answered.length;
+                document.getElementById('pendingQuestions').textContent = pending.length;
+                document.getElementById('newNotifications').textContent = unreadNotifications.length;
 
-            const container = document.getElementById('questionsContainer');
-            if (pending.length === 0) {
-                container.innerHTML = `
+                const container = document.getElementById('questionsContainer');
+                console.log('Questions container found:', container !== null);
+                if (pending.length === 0) {
+                    console.log('No pending questions found');
+                    container.innerHTML = `
+                        <div class="no-questions">
+                            <i class="fas fa-comments" style="font-size: 3rem; color: #20B2AA; margin-bottom: 1rem;"></i>
+                            <h3>কোন প্রশ্ন নেই</h3>
+                            <p>সব প্রশ্নের উত্তর দেওয়া হয়ে গেছে!</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                console.log('Rendering', pending.length, 'pending questions');
+
+                container.innerHTML = pending.map(q => `
+                    <div class="qa-card">
+                        <div class="question-header">
+                            <h3>${q.title}</h3>
+                            <span class="question-type ${q.type}">${q.type === 'human' ? 'মানুষ' : 'পশু'}</span>
+                        </div>
+                        <p><strong>রোগীর নাম:</strong> ${q.patientName || 'উল্লেখ নেই'}</p>
+                        <p><strong>প্রশ্ন:</strong> ${q.description}</p>
+                        <p><strong>বয়স:</strong> ${q.age || 'উল্লেখ নেই'}</p>
+                        <p><strong>তারিখ:</strong> ${new Date(q.createdAt).toLocaleDateString('bn-BD')}</p>
+                        
+                        <div class="form-group">
+                            <label>আপনার উত্তর:</label>
+                            <textarea id="answer_${q._id}" placeholder="এখানে আপনার উত্তর লিখুন..."></textarea>
+                        </div>
+                        <button class="btn" onclick="submitAnswer('${q._id}')">উত্তর জমা দিন</button>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                alert('Error: ' + error.message + '\n\nCheck browser console (F12) for details.');
+                document.getElementById('questionsContainer').innerHTML = `
                     <div class="no-questions">
-                        <i class="fas fa-comments" style="font-size: 3rem; color: #20B2AA; margin-bottom: 1rem;"></i>
-                        <h3>কোন প্রশ্ন নেই</h3>
-                        <p>এখনো কোন রোগী প্রশ্ন করেনি।</p>
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc2626; margin-bottom: 1rem;"></i>
+                        <h3>ত্রুটি</h3>
+                        <p>প্রশ্ন লোড করতে সমস্যা হয়েছে: ${error.message}</p>
+                        <p>Browser console (F12) check করুন।</p>
                     </div>
                 `;
-                return;
             }
-
-            container.innerHTML = pending.map(q => `
-                <div class="qa-card">
-                    <div class="question-header">
-                        <h3>${q.title}</h3>
-                        <span class="question-type ${q.type}">${q.type === 'human' ? 'মানুষ' : 'পশু'}</span>
-                    </div>
-                    <p><strong>প্রশ্ন:</strong> ${q.description}</p>
-                    <p><strong>বয়স:</strong> ${q.age || 'উল্লেখ নেই'}</p>
-                    <p><strong>তারিখ:</strong> ${new Date(q.createdAt).toLocaleDateString('bn-BD')}</p>
-                    
-                    <div class="form-group">
-                        <label>আপনার উত্তর:</label>
-                        <textarea id="answer_${q.id}" placeholder="এখানে আপনার উত্তর লিখুন..."></textarea>
-                    </div>
-                    <button class="btn" onclick="submitAnswer('${q.id}')">উত্তর জমা দিন</button>
-                </div>
-            `).join('');
         }
 
-        function loginDoctor() {
+        async function loginDoctor() {
             const doctorId = document.getElementById('doctorIdInput').value.trim();
             if (!doctorId) {
                 alert('ইউজার ID দিন');
                 return;
             }
             
-            const doctors = localDB.getDoctors();
-            const doctor = doctors.find(d => d.id === doctorId);
-            if (doctor) {
-                localStorage.setItem('curafam_logged_doctor', doctorId);
-                document.getElementById('loginStatus').innerHTML = `<span style="color: green;">✓ লগইন সফল: ${doctor.name}</span>`;
-                document.getElementById('welcomeMessage').textContent = `স্বাগতম, ডা. ${doctor.name}!`;
-                document.getElementById('dashboardContent').style.display = 'block';
-                loadDashboard();
-            } else {
-                alert('অবৈধ ইউজার ID');
+            try {
+                // Fetch doctors from MongoDB
+                const response = await fetch(`${API_BASE}/api/doctors`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch doctors');
+                }
+                const doctors = await response.json();
+                const doctor = doctors.find(d => d._id === doctorId);
+                
+                if (doctor) {
+                    localStorage.setItem('curafam_logged_doctor', doctorId);
+                    localStorage.setItem('curafam_doctor_name', doctor.name);
+                    document.getElementById('loginStatus').innerHTML = `<span style="color: green;">✓ লগইন সফল: ${doctor.name}</span>`;
+                    document.getElementById('welcomeMessage').textContent = `স্বাগতম, ডা. ${doctor.name}!`;
+                    document.getElementById('dashboardContent').style.display = 'block';
+                    loadDashboard();
+                } else {
+                    alert('অবৈধ ইউজার ID');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('লগইন করতে সমস্যা হয়েছে।');
             }
         }
         
@@ -210,7 +478,7 @@
             document.getElementById('doctorIdInput').value = '';
         }
 
-        function submitAnswer(questionId) {
+        async function submitAnswer(questionId) {
             const loggedDoctorId = localStorage.getItem('curafam_logged_doctor');
             if (!loggedDoctorId) {
                 alert('প্রথমে লগইন করুন');
@@ -223,12 +491,32 @@
                 return;
             }
 
-            const result = localDB.updateQuestion(questionId, answerText, loggedDoctorId);
-            if (result.success) {
-                alert('উত্তর সফলভাবে জমা দেওয়া হয়েছে!');
-                loadDashboard();
-            } else {
-                alert('ত্রুটি: ' + result.error);
+            try {
+                // Get doctor name from localStorage
+                const doctorName = localStorage.getItem('curafam_doctor_name') || 'Anonymous Doctor';
+                
+                // Submit answer to MongoDB server
+                const response = await fetch(`${API_BASE}/api/questions/${questionId}/answer`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        answer: answerText,
+                        answeredBy: doctorName
+                    })
+                });
+                
+                if (response.ok) {
+                    alert('উত্তর সফলভাবে জমা দেওয়া হয়েছে!');
+                    loadDashboard();
+                } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    alert('ত্রুটি: ' + (errorData.error || 'Server error'));
+                }
+            } catch (error) {
+                console.error('Error submitting answer:', error);
+                alert('উত্তর জমা দিতে সমস্যা হয়েছে। ইন্টারনেট সংযোগ চেক করুন এবং আবার চেষ্টা করুন।');
             }
         }
 
@@ -269,17 +557,26 @@
             showNotifications();
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             const loggedDoctorId = localStorage.getItem('curafam_logged_doctor');
             if (loggedDoctorId) {
-                const doctors = localDB.getDoctors();
-                const doctor = doctors.find(d => d.id === loggedDoctorId);
-                if (doctor) {
-                    document.getElementById('doctorIdInput').value = loggedDoctorId;
-                    document.getElementById('loginStatus').innerHTML = `<span style="color: green;">✓ লগইন সফল: ${doctor.name}</span>`;
-                    document.getElementById('welcomeMessage').textContent = `স্বাগতম, ডা. ${doctor.name}!`;
-                    document.getElementById('dashboardContent').style.display = 'block';
-                    loadDashboard();
+                try {
+                    // Fetch doctors from MongoDB
+                    const response = await fetch(`${API_BASE}/api/doctors`);
+                    if (response.ok) {
+                        const doctors = await response.json();
+                        const doctor = doctors.find(d => d._id === loggedDoctorId);
+                        if (doctor) {
+                            localStorage.setItem('curafam_doctor_name', doctor.name);
+                            document.getElementById('doctorIdInput').value = loggedDoctorId;
+                            document.getElementById('loginStatus').innerHTML = `<span style="color: green;">✓ লগইন সফল: ${doctor.name}</span>`;
+                            document.getElementById('welcomeMessage').textContent = `স্বাগতম, ডা. ${doctor.name}!`;
+                            document.getElementById('dashboardContent').style.display = 'block';
+                            loadDashboard();
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading doctor session:', error);
                 }
             }
         });
