@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>দ্রুত রেজিস্ট্রেশন - CuraFam</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background: #f8fafc; }
@@ -252,6 +251,8 @@
     </main>
 
     <script>
+        const API_BASE = 'https://curafam.onrender.com';
+        
         class LocalDatabase {
             addDoctor(doctorData) {
                 const doctors = JSON.parse(localStorage.getItem('curafam_doctors') || '[]');
@@ -350,8 +351,13 @@
             document.getElementById('doctorQualification').value = '';
         }
 
-        document.getElementById('quickRegistrationForm').addEventListener('submit', function(e) {
+        document.getElementById('quickRegistrationForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'রেজিস্ট্রেশন হচ্ছে...';
+            submitBtn.disabled = true;
             
             const doctorData = {
                 type: currentType,
@@ -404,22 +410,48 @@
                 return;
             }
 
-            // Check if email already exists
-            const existingDoctors = JSON.parse(localStorage.getItem('curafam_doctors') || '[]');
-            if (existingDoctors.some(d => d.email === doctorData.email)) {
-                alert('এই ইমেইল দিয়ে ইতিমধ্যে রেজিস্ট্রেশন করা হয়েছে');
-                return;
+            try {
+                // Save to MongoDB server - send only required fields
+                const mongoData = {
+                    name: doctorData.name,
+                    email: doctorData.email,
+                    phone: doctorData.phone,
+                    specialty: doctorData.specialty
+                };
+                
+                const response = await fetch(`${API_BASE}/api/doctors`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(mongoData)
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || 'Registration failed');
+                }
+                
+                const savedDoctor = await response.json();
+                const doctorId = savedDoctor._id;
+                
+                // Also save to localStorage for backup
+                localDB.addDoctor(doctorData);
+                
+                localStorage.setItem('curafam_logged_doctor', doctorId);
+                localStorage.setItem('curafam_doctor_email', doctorData.email);
+                
+                alert(`🎉 অভিনন্দন! আপনার দ্রুত রেজিস্ট্রেশন সফল হয়েছে!\n\nআপনার ইউজার ID: ${doctorId}\n\nএই ID দিয়ে লগইন করুন।`);
+                
+                setTimeout(() => {
+                    window.location.href = 'doctor-dashboard.html';
+                }, 3000);
+            } catch (error) {
+                console.error('Registration error:', error);
+                alert('রেজিস্ট্রেশনে সমস্যা হয়েছে: ' + error.message);
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
             }
-
-            const doctorId = localDB.addDoctor(doctorData);
-            
-            localStorage.setItem('curafam_logged_doctor', doctorId);
-            
-            alert(`🎉 অভিনন্দন! আপনার দ্রুত রেজিস্ট্রেশন সফল হয়েছে!\n\nআপনার ইউজার ID: ${doctorId}\n\nএই ID দিয়ে লগইন করুন।`);
-            
-            setTimeout(() => {
-                window.location.href = 'doctor-dashboard.html';
-            }, 3000);
         });
 
         function isValidEmail(email) {
@@ -432,6 +464,5 @@
             return bdPhoneRegex.test(phone.replace(/[\s-]/g, ''));
         }
     </script>
-    <script src="script.js"></script>
 </body>
 </html>
